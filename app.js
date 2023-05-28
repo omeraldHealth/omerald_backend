@@ -32,13 +32,7 @@ const mongodbURI = process.env.MONGODB_URI;
 
 // Middleware
 app.use(express.json());
-app.use(
-  cors({
-    origin: "*", // Allow only requests from this origin
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow only these HTTP methods
-    allowedHeaders: ['*'], // Allow only these headers
-  })
-);
+app.use(cors());
 
 
 //Enable gzip compression
