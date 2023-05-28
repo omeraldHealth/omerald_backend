@@ -47,8 +47,10 @@ app.get('/', (req, res) => {
 
 app.use((req, res, next) => {
   res.setHeader('Referrer-Policy', 'no-referrer');
+  res.setHeader('Access-Control-Allow-Origin', '*');
   next();
 });
+
 
 // Start the server
 const port = process.env.PORT || 3000;
