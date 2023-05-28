@@ -12,22 +12,22 @@ const mongodbURI = "mongodb+srv://omerald_admin_user:cGL2eu2vq9CiVlI0@adminclust
 // ******************************************** MiddlWare ****************************************************************************************
 // Middleware
 app.use(express.json());
-// app.use(cors());
+app.use(cors());
 
 //Enable gzip compression
-// app.use(compression());
+app.use(compression());
+app.use((req, res, next) => {
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  next();
+});
+
 
 app.use('/users', userRoutes);
 
 // Routes
 app.get('/', (req, res) => {
   res.send('Hello, Express!');
-});
-
-app.use((req, res, next) => {
-  res.setHeader('Referrer-Policy', 'no-referrer');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  next();
 });
 
 // Start the server
