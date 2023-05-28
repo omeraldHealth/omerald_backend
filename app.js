@@ -34,9 +34,9 @@ const mongodbURI = process.env.MONGODB_URI;
 app.use(express.json());
 app.use(
   cors({
-    origin: 'https://example.com', // Allow only requests from this origin
+    origin: "*", // Allow only requests from this origin
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow only these HTTP methods
-    allowedHeaders: ['Content-Type', 'Authorization'], // Allow only these headers
+    allowedHeaders: ['*'], // Allow only these headers
   })
 );
 
