@@ -1,10 +1,11 @@
 const express = require('express');
-const app = express();
-const compression = require('compression');
-
 const mongoose = require('mongoose');
+const compression = require('compression');
+const cors = require('cors');
+
 require('dotenv').config();
 
+const app = express();
 const userRoutes = require("./app/routes/userRouter")
 const mongodbURI = process.env.MONGODB_URI;
 
@@ -31,6 +32,14 @@ const mongodbURI = process.env.MONGODB_URI;
 
 // Middleware
 app.use(express.json());
+app.use(
+  cors({
+    origin: 'https://example.com', // Allow only requests from this origin
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow only these HTTP methods
+    allowedHeaders: ['Content-Type', 'Authorization'], // Allow only these headers
+  })
+);
+
 
 //Enable gzip compression
 app.use(compression());
