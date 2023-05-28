@@ -45,6 +45,11 @@ app.get('/', (req, res) => {
   res.send('Hello, Express!');
 });
 
+app.use((req, res, next) => {
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  next();
+});
+
 // Start the server
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
