@@ -26,6 +26,7 @@ const createDiagnosedConditions = async (req, res) => {
     try {
       const { title, description,imageUrl,aliases,isActive,healthTopicLinks} = req.body;
       const diagnosedCondition = await DiagnoseConditionsModel.create({title, description,imageUrl,aliases,isActive,healthTopicLinks});
+
       if (!diagnosedCondition) {
         return res.status(404).json({ error: 'diagnosedCondition not found' });
       }
