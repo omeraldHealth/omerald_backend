@@ -16,6 +16,9 @@ const ignoredParamRouter = require("./app/routes/ignoredParamRouter")
 const parameterRouter =  require("./app/routes/parameterRouter")
 const reportRouter = require("./app/routes/reportRouter")
 const sampleRouter = require("./app/routes/sampleRoutes")
+const userSettingRouter = require("./app/routes/userSettingRouter")
+const diagSettingRouter = require("./app/routes/diagnosticSettingRouter")
+
 
 const mongodbURI = "mongodb+srv://omerald_admin_user:cGL2eu2vq9CiVlI0@admincluster.tljywn6.mongodb.net/omerald_admin?retryWrites=true&w=majority";
 
@@ -42,6 +45,8 @@ app.use('/ignoredParams', ignoredParamRouter);
 app.use('/parameter', parameterRouter);
 app.use('/reports', reportRouter);
 app.use('/samples', sampleRouter);
+app.use('/userSettings',userSettingRouter)
+app.use('/diagSettings',diagSettingRouter)
 
 // Routes
 app.get('/', (req, res) => {
