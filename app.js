@@ -35,7 +35,7 @@ app.use('/diagnosedConditions', diagnosedConditionRoutes);
 app.use('/doseDuration', doseDurationRoutes);
 app.use('/doses', dosesRoutes);
 app.use('/vaccine', vaccineRoutes);
-app.use('/ignoredParam', ignoredParamRouter);
+app.use('/ignoredParams', ignoredParamRouter);
 
 // Routes
 app.get('/', (req, res) => {

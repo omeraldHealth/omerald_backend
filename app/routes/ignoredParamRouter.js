@@ -3,8 +3,8 @@ const router = express.Router();
 const ignoredParamController = require("../controllers/IgnoredParam")
 
 // GET all users
-router.get('/getAllignoredParam', ignoredParamController.getignoredParams);
-router.post('/addignoredParam', ignoredParamController.createignoredParams);
+router.get('/getAllignoredParams', ignoredParamController.getIgnoredParams);
+router.post('/addignoredParam', ignoredParamController.createIgnoredParams);
 router.post('/addManyignoredParam', ignoredParamController.createManyignoredParams);
 router.put('/updateignoredParam', ignoredParamController.updateignoredParams);
 router.delete('/deleteignoredParam/:id', ignoredParamController.deleteignoredParams);
