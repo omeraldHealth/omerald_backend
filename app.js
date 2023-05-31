@@ -7,6 +7,8 @@ require('dotenv').config();
 
 const app = express();
 const userRoutes = require("./app/routes/userRouter")
+const analysedParamRoutes = require("./app/routes/analysedParamRouter")
+
 const mongodbURI = "mongodb+srv://omerald_admin_user:cGL2eu2vq9CiVlI0@admincluster.tljywn6.mongodb.net/omerald_admin?retryWrites=true&w=majority";
 
 // ******************************************** MiddlWare ****************************************************************************************
@@ -23,6 +25,7 @@ app.use((req, res, next) => {
 });
 
 app.use('/users', userRoutes);
+app.use('/analysedParams', analysedParamRoutes);
 
 // Routes
 app.get('/', (req, res) => {

@@ -1,4 +1,4 @@
-const User = require('../../models/user/userModel');
+const User = require('../models/userModel');
 
 // Get all users
 const getUsers = async (req, res) => {
@@ -32,7 +32,7 @@ const createUser = async (req, res) => {
     const user = await User.create({ userName, phoneNumber, role });
     res.status(201).json(user);
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error' + error });
   }
 };
 
