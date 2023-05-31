@@ -22,12 +22,11 @@ app.use((req, res, next) => {
   next();
 });
 
-
 app.use('/users', userRoutes);
 
 // Routes
 app.get('/', (req, res) => {
-  res.send('Hello, Express!');
+  res.send('Hello, Omerald Express!');
 });
 
 // Start the server
@@ -69,3 +68,5 @@ process.on('SIGINT', () => {
 
 
 // ************************************************************************************************************************************
+
+
