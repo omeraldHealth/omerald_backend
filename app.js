@@ -12,6 +12,7 @@ const diagnosedConditionRoutes = require("./app/routes/diagnosedCondition")
 const doseDurationRoutes = require("./app/routes/doseDurationRouter")
 const dosesRoutes = require("./app/routes/doses")
 const vaccineRoutes = require("./app/routes/vaccineRouter")
+const ignoredParamRouter = require("./app/routes/ignoredParamRouter")
 
 const mongodbURI = "mongodb+srv://omerald_admin_user:cGL2eu2vq9CiVlI0@admincluster.tljywn6.mongodb.net/omerald_admin?retryWrites=true&w=majority";
 
@@ -34,6 +35,7 @@ app.use('/diagnosedConditions', diagnosedConditionRoutes);
 app.use('/doseDuration', doseDurationRoutes);
 app.use('/doses', dosesRoutes);
 app.use('/vaccine', vaccineRoutes);
+app.use('/ignoredParam', ignoredParamRouter);
 
 // Routes
 app.get('/', (req, res) => {
