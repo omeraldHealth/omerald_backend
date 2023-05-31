@@ -6,6 +6,5 @@ const analysedParamController = require("../controllers/analysedParam")
 router.get('/getAllParams', analysedParamController.getAnalysedParams);
 router.post('/addParams', analysedParamController.createAnalysedParam);
 router.post('/addManyParams', analysedParamController.createManyParam);
-router.put('/updateParam', analysedParamController.updateAnalysedParam);
 
 module.exports = router;

@@ -25,11 +25,11 @@ const getDiagnosedConditionById = async (req, res) => {
 const createDiagnosedConditions = async (req, res) => {
     try {
       const { title, description,imageUrl,aliases,isActive,healthTopicLinks} = req.body;
-      const diagnosedCondition = await diagnosedCondition.save({title, description,imageUrl,aliases,isActive,healthTopicLinks});
+      const diagnosedCondition = await DiagnoseConditionsModel.create({title, description,imageUrl,aliases,isActive,healthTopicLinks});
       if (!diagnosedCondition) {
         return res.status(404).json({ error: 'diagnosedCondition not found' });
       }
-      res.json({ message: 'diagnosedCondition deleted successfully' });
+      res.json({ message: 'diagnosedCondition added successfully' });
     } catch (error) {
       res.status(500).json({ error: 'Internal server error' });
     }
@@ -38,7 +38,7 @@ const createDiagnosedConditions = async (req, res) => {
 // Delete a diagnosedCondition by ID
 const createManyDiagnosedConditions = async (req, res) => {
   try {
-    const diagnosedCondition = await diagnosedCondition.insertMany(req.body);
+    const diagnosedCondition = await DiagnoseConditionsModel.insertMany(req.body);
     if (!diagnosedCondition) {
       return res.status(404).json({ error: 'diagnosedCondition not found' });
     }
@@ -51,20 +51,20 @@ const createManyDiagnosedConditions = async (req, res) => {
 const updateDiagnosedConditions = async (req, res) => {
     const { id } = req.body;
     try {
-      const diagnosedCondition = await diagnosedCondition.findByIdAndUpdate(id,req.body, { new: true });
+      const diagnosedCondition = await DiagnoseConditionsModel.findByIdAndUpdate(id,req.body, { new: true });
       if (!diagnosedCondition) {
         return res.status(404).json({ error: 'diagnosedCondition not found' });
       }
-      res.json({ message: 'diagnosedCondition deleted successfully' });
+      res.json({ message: 'diagnosedCondition updated successfully' });
     } catch (error) {
       res.status(500).json({ error: 'Internal server error' });
     }
 };
 
 const deleteDiagnosedCondition = async (req, res) => {
-    const { id } = req.body;
+    const { id } = req.params;
     try {
-      const diagnosedCondition = await diagnosedCondition.findByIdAndDelete(id);
+      const diagnosedCondition = await DiagnoseConditionsModel.findByIdAndDelete(id);
       if (!diagnosedCondition) {
         return res.status(404).json({ error: 'diagnosedCondition not found' });
       }
@@ -78,9 +78,9 @@ const searchDiagnosedCondition = async (req, res) => {
     const { query = '', page = 1 } = req.params;
     const pageSize = 20;
     const skip = (page - 1) * pageSize;
-  
+    console.log("sd"+query)
     try {
-        const results = await diagnosedCondition.find({
+        const results = await DiagnoseConditionsModel.find({
             title: { $regex: query, $options: 'i' },
             isActive: true,
           })

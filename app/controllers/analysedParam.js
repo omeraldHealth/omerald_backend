@@ -46,6 +46,5 @@ const createManyParam = async (req, res) => {
 module.exports = {
   getAnalysedParams,
   createAnalysedParam,
-  updateAnalysedParam,
   createManyParam,
 };
