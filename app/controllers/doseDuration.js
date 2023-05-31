@@ -46,7 +46,7 @@ const updateDoseDuration = async (req, res) => {
 
 // Delete a DoseDuration by ID
 const deleteDoseDuration = async (req, res) => {
-  const { id } = req.body;
+  const { id } = req.params;
   try {
     const doseDuration = await DoseDuration.findByIdAndDelete(id);
     if (!doseDuration) {

@@ -6,7 +6,7 @@ const doseDurationController = require("../controllers/doseDuration")
 router.get('/getAllDoseDuration', doseDurationController.getDoseDuration);
 router.post('/addDoseDuration', doseDurationController.createDoseDuration);
 router.post('/addManyDoseDuration', doseDurationController.createManyDoseDuration);
-router.post('/updateDoseDuration', doseDurationController.updateDoseDuration);
-router.post('/deleteDoseDuration', doseDurationController.deleteDoseDuration);
+router.put('/updateDoseDuration', doseDurationController.updateDoseDuration);
+router.delete('/deleteDoseDuration/:id', doseDurationController.deleteDoseDuration);
 
 module.exports = router;
