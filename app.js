@@ -9,7 +9,7 @@ const app = express();
 const userRoutes = require("./app/routes/userRouter")
 const analysedParamRoutes = require("./app/routes/analysedParamRouter")
 const diagnosedConditionRoutes = require("./app/routes/diagnosedCondition")
-
+const doseDurationRoutes = require("./app/routes/doseDurationRouter")
 
 const mongodbURI = "mongodb+srv://omerald_admin_user:cGL2eu2vq9CiVlI0@admincluster.tljywn6.mongodb.net/omerald_admin?retryWrites=true&w=majority";
 
@@ -29,6 +29,7 @@ app.use((req, res, next) => {
 app.use('/users', userRoutes);
 app.use('/analysedParams', analysedParamRoutes);
 app.use('/diagnosedConditions', diagnosedConditionRoutes);
+app.use('/doseDuration', doseDurationRoutes);
 
 // Routes
 app.get('/', (req, res) => {
