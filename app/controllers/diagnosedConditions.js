@@ -78,7 +78,7 @@ const searchDiagnosedCondition = async (req, res) => {
     const { query = '', page = 1 } = req.params;
     const pageSize = 20;
     const skip = (page - 1) * pageSize;
-    console.log("sd"+query)
+
     try {
         const results = await DiagnoseConditionsModel.find({
             title: { $regex: query, $options: 'i' },
