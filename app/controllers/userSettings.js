@@ -32,9 +32,22 @@ const createUserSetting = async (req, res) => {
 
 // Update a userSetting by ID
 const updateUserSetting = async (req, res) => {
-  const { id } = req.body;
+  const { key } = req.body;
   try {
-    const userSetting = await UserSettingsModel.findByIdAndUpdate(id,req.body, { new: true });
+    const userSetting = await UserSettingsModel.findOneAndUpdate({key:key},req.body, { new: true });
+    if (!userSetting) {
+      return res.status(404).json({ error: 'userSetting not found' });
+    }
+    res.json(userSetting);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+const deleteUserSetting = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const userSetting = await UserSettingsModel.findByIdAndDelete(id);
     if (!userSetting) {
       return res.status(404).json({ error: 'userSetting not found' });
     }
@@ -49,4 +62,5 @@ module.exports = {
   getUserSettingByKey,
   createUserSetting,
   updateUserSetting,
+  deleteUserSetting,
 };

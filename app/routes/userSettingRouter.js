@@ -7,5 +7,6 @@ router.get('/getUserSetting', userSettingController.getUserSetting);
 router.get('/getUserSettingByKey/:key', userSettingController.getUserSettingByKey);
 router.post('/addUserSetting', userSettingController.createUserSetting);
 router.put('/updateUserSetting', userSettingController.updateUserSetting);
+router.delete('/deleteUserSetting/:id', userSettingController.deleteUserSetting);
 
 module.exports = router;

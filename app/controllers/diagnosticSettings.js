@@ -32,9 +32,9 @@ const createDiagnosticSetting = async (req, res) => {
 
 // Update a diagnosticSetting by ID
 const updateDiagnosticSetting = async (req, res) => {
-  const { id } = req.body;
+  const { key } = req.body;
   try {
-    const diagnosticSetting = await DiagnosticSettingsModel.findByIdAndUpdate(id,req.body, { new: true });
+    const diagnosticSetting = await DiagnosticSettingsModel.findOneAndUpdate({key:key},req.body, { new: true });
     if (!diagnosticSetting) {
       return res.status(404).json({ error: 'diagnosticSetting not found' });
     }

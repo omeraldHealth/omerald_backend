@@ -1,7 +1,7 @@
 const mongoose  = require("mongoose")
 
 const userSettings = new mongoose.Schema({
-  key: { type: String, required: true },
+  key: { type: String, required: true, unique: true },
   value: mongoose.Mixed,
   isActive: { type: Boolean, default: true },
 });

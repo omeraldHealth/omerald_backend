@@ -3,7 +3,10 @@ const DosesModel = require('../models/dose');
 // Get all dosess
 const getAlldosess = async (req, res) => {
   try {
-    const doses = await DosesModel.find();
+    const doses = await DosesModel.find()
+    .populate('duration', 'duration _id')
+    .populate('vaccine', 'name _id')
+    .exec();
     res.json(doses);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
@@ -14,7 +17,10 @@ const getAlldosess = async (req, res) => {
 const getdosesById = async (req, res) => {
     try {
         const { id } = req.params;
-        const doses = await DosesModel.findById(id);
+        const doses = await DosesModel.findById(id)
+        .populate('duration', 'duration _id')
+        .populate('vaccine', 'name _id')
+        .exec();
         res.json(doses);
       } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
