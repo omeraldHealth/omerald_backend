@@ -1,7 +1,10 @@
 const mongoose = require('mongoose');
 
 const doseDurations = new mongoose.Schema({
-  duration: { type: String, required: true },
+  duration: { 
+    type: {type: String, required: true},
+    value: {type: String, required: true}
+   },
 });
 
 mongoose.models = {};
