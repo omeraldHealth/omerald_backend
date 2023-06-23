@@ -32,9 +32,10 @@ const createManyParameter = async (req, res) => {
 
 // Update a parameter by ID
 const updateParameter = async (req, res) => {
-  const { id,name } = req.body;
+  const { id } = req.body;
+  delete req.body.id;
   try {
-    const parameter = await ParametersModel.findByIdAndUpdate(id, { name }, { new: true });
+    const parameter = await ParametersModel.findByIdAndUpdate(id, req.body, { new: true });
     if (!parameter) {
       return res.status(404).json({ error: 'parameter not found' });
     }
