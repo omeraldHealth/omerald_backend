@@ -6,8 +6,26 @@ const parameters = new mongoose.Schema({
   aliases: { type: [String] },
   units: {type: String},
   bioRefRange: {
-    min: String,
-    max: String,
+    reportType: String,
+    genders: [
+      {
+        genderType: String,
+        ageRanges: [
+          {
+            rangeType: String,
+            min: Number,
+            max: Number,
+            advance: [
+              {
+                advanceType: String,
+                min: Number,
+                max: Number
+              }
+            ]
+          }
+        ]
+      }
+    ]
   },
   isActive: { type: Boolean, default: false },
 });
