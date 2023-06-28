@@ -5,28 +5,29 @@ const parameters = new mongoose.Schema({
   description: { type: String },
   aliases: { type: [String] },
   units: {type: String},
-  bioRefRange: {
-    reportType: String,
-    genders: [
-      {
-        genderType: String,
+  bioRefRange: [{
+    rangeType: {type:String},
+    min: {type:Number},
+    max:{type:Number},
+    advanceRange: {
+        reportType:  {type:String},
+        genderType:  {type:String},
         ageRanges: [
           {
-            rangeType: String,
-            min: Number,
-            max: Number,
-            advance: [
-              {
-                advanceType: String,
-                min: Number,
-                max: Number
-              }
-            ]
+            ageRangeType:  {type:String},
+            min: {type:Number},
+            max:{type:Number},
+          }
+        ],
+        criticality:[
+          {
+            criticalityType: {type:String},
+            min: {type:Number},
+            max:{type:Number},
           }
         ]
-      }
-    ]
-  },
+    }
+  }],
   isActive: { type: Boolean, default: false },
 });
 
