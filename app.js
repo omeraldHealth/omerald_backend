@@ -20,7 +20,7 @@ const userSettingRouter = require("./app/routes/userSettingRouter")
 const diagSettingRouter = require("./app/routes/diagnosticSettingRouter")
 
 
-const mongodbURI = "mongodb+srv://omerald_admin_user:cGL2eu2vq9CiVlI0@admincluster.tljywn6.mongodb.net/omerald_admin?retryWrites=true&w=majority";
+const mongodbURI = "mongodb+srv://admin_omerald:AlsYOmxNMClFAnXA@omerald.kpwrao8.mongodb.net/omerald_admin?retryWrites=true&w=majority"
 
 // ******************************************** MiddlWare ****************************************************************************************
 // Middleware
