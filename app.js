@@ -20,7 +20,7 @@ const userSettingRouter = require("./app/routes/userSettingRouter")
 const diagSettingRouter = require("./app/routes/diagnosticSettingRouter")
 
 
-const mongodbURI = "mongodb+srv://admin_omerald:AlsYOmxNMClFAnXA@omerald.kpwrao8.mongodb.net/omerald_admin?retryWrites=true&w=majority"
+const mongodbURI = "mongodb+srv://omerald_admin_stage:Omerald2024@admincluster.tljywn6.mongodb.net/omerald_admin?retryWrites=true&w=majority"
 
 // ******************************************** MiddlWare ****************************************************************************************
 // Middleware
@@ -54,7 +54,7 @@ app.get('/', (req, res) => {
 });
 
 // Start the server
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 9000;
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
