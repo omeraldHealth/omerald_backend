@@ -24,12 +24,16 @@ const diagSettingRouter = require("./app/routes/diagnosticSettingRouter")
 const mongodbURI = "mongodb+srv://omerald_admin_stage:Omerald2024@admincluster.tljywn6.mongodb.net/omerald_admin?retryWrites=true&w=majority"
 
 // ******************************************** MiddlWare ****************************************************************************************
-// Middleware
-app.use(express.json());
+// Enable gzip compression
+app.use(compression());
+
+// CORS middleware - place it before your route handlers
 app.use(cors());
 
-//Enable gzip compression
-app.use(compression());
+// Your routes and other middleware go here
+
+app.use(express.json());
+
 app.use((req, res, next) => {
   res.setHeader('Referrer-Policy', 'no-referrer');
   res.setHeader('Access-Control-Allow-Origin', '*');
