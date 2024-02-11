@@ -28,7 +28,9 @@ const mongodbURI = "mongodb+srv://omerald_admin_stage:Omerald2024@admincluster.t
 app.use(compression());
 
 // CORS middleware - place it before your route handlers
-app.use(cors());
+app.use(cors({
+  origin: "*"
+}));
 
 // Your routes and other middleware go here
 
