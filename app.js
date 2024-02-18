@@ -4,7 +4,6 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-const app = express();
 const userRoutes = require("./app/routes/userRouter")
 const analysedParamRoutes = require("./app/routes/analysedParamRouter")
 const diagnosedConditionRoutes = require("./app/routes/diagnosedCondition")
@@ -18,35 +17,39 @@ const sampleRouter = require("./app/routes/sampleRoutes")
 const userSettingRouter = require("./app/routes/userSettingRouter")
 const diagSettingRouter = require("./app/routes/diagnosticSettingRouter")
 
-const mongodbURI = "mongodb+srv://omerald_admin_stage:Omerald2024@admincluster.tljywn6.mongodb.net/omerald_admin?retryWrites=true&w=majority"
-
 // ******************************************** MiddlWare ****************************************************************************************
 
-
+const app = express();
 const corsOptions ={
-    origin:'http://localhost:3000', 
-    credentials:true,            
-    optionSuccessStatus:200
-}
+  origin: '*',
+  credentials: true,
+  optionSuccessStatus: 200
+};
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(compression());
-app.use((req,res,next)=>{
+app.options('*', cors(corsOptions));
+
+app.use((req, res, next) => {
   res.setHeader('Referrer-Policy', 'no-referrer');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader("Access-Control-Allow-Methods", "*");
   res.setHeader("Access-Control-Allow-Headers", "*");
   res.setHeader('Content-Security-Policy', 'unsafe-url');
   next();
-})
-// Start the server
+});
 
+// Start the server
 const port = process.env.PORT || 3001;
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
-// Your routes and other middleware go here
+
+// Routes
+app.get('/', (req, res) => {
+  res.send('Hello, Omerald Express!');
+});
 
 app.use('/users', userRoutes);
 app.use('/analysedParams', analysedParamRoutes);
@@ -61,16 +64,12 @@ app.use('/samples', sampleRouter);
 app.use('/userSettings',userSettingRouter)
 app.use('/diagSettings',diagSettingRouter)
 
-// Routes
-app.get('/', (req, res) => {
-  res.send('Hello, Omerald Express!');
-});
-
-
 
 // ********************************************** Mongoose **************************************************************************************
 
 // Set up Mongoose connection pool
+const mongodbURI = "mongodb+srv://omerald_admin_stage:Omerald2024@admincluster.tljywn6.mongodb.net/omerald_admin?retryWrites=true&w=majority"
+
 mongoose.connect(mongodbURI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
