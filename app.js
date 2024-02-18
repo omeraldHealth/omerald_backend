@@ -26,7 +26,7 @@ const mongodbURI = "mongodb+srv://omerald_admin_stage:Omerald2024@admincluster.t
 // ******************************************** MiddlWare ****************************************************************************************
 // Enable gzip compression
 app.use(compression());
-fix
+
 // Enable CORS for all routes
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
