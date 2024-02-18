@@ -2,9 +2,7 @@ const express = require('express');
 const compression = require('compression');
 const cors = require('cors');
 const mongoose = require('mongoose');
-
 require('dotenv').config();
-
 
 const app = express();
 const userRoutes = require("./app/routes/userRouter")
@@ -20,23 +18,9 @@ const sampleRouter = require("./app/routes/sampleRoutes")
 const userSettingRouter = require("./app/routes/userSettingRouter")
 const diagSettingRouter = require("./app/routes/diagnosticSettingRouter")
 
-
 const mongodbURI = "mongodb+srv://omerald_admin_stage:Omerald2024@admincluster.tljywn6.mongodb.net/omerald_admin?retryWrites=true&w=majority"
 
 // ******************************************** MiddlWare ****************************************************************************************
-// Enable gzip compression
-app.use(compression());
-
-// Enable CORS for all routes
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  res.header('Access-Control-Allow-Headers', '*');
-  next();
-});
-
-// Your routes and other middleware go here
-
 app.use(express.json());
 
 app.use((req, res, next) => {
@@ -48,6 +32,9 @@ app.use((req, res, next) => {
   
   next();
 });
+
+app.use(compression());
+// Your routes and other middleware go here
 
 app.use('/users', userRoutes);
 app.use('/analysedParams', analysedParamRoutes);
@@ -68,7 +55,7 @@ app.get('/', (req, res) => {
 });
 
 // Start the server
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
