@@ -21,19 +21,31 @@ const diagSettingRouter = require("./app/routes/diagnosticSettingRouter")
 const mongodbURI = "mongodb+srv://omerald_admin_stage:Omerald2024@admincluster.tljywn6.mongodb.net/omerald_admin?retryWrites=true&w=majority"
 
 // ******************************************** MiddlWare ****************************************************************************************
+
+
+const corsOptions ={
+    origin:'http://localhost:3000', 
+    credentials:true,            
+    optionSuccessStatus:200
+}
+app.use(cors(corsOptions));
 app.use(express.json());
-
-app.use((req, res, next) => {
-  res.setHeader('Referrer-Policy', 'no-referrer');
-
-  res.setHeader('Access-Control-Allow-Origin', '*'); // Allow requests from any origin
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  
-  next();
-});
-
 app.use(compression());
+app.use((req,res,next)=>{
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader("Access-Control-Allow-Methods", "*");
+  res.setHeader("Access-Control-Allow-Headers", "*");
+  res.setHeader('Content-Security-Policy', 'unsafe-url');
+  next();
+})
+// Start the server
+
+const port = process.env.PORT || 3001;
+
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
 // Your routes and other middleware go here
 
 app.use('/users', userRoutes);
@@ -54,11 +66,7 @@ app.get('/', (req, res) => {
   res.send('Hello, Omerald Express!');
 });
 
-// Start the server
-const port = process.env.PORT || 3001;
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+
 
 // ********************************************** Mongoose **************************************************************************************
 
