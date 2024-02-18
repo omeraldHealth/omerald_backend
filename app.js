@@ -20,7 +20,7 @@ const diagSettingRouter = require("./app/routes/diagnosticSettingRouter")
 // ******************************************** MiddlWare ****************************************************************************************
 
 const app = express();
-const corsOptions ={
+const corsOptions = {
   origin: '*',
   credentials: true,
   optionSuccessStatus: 200
@@ -28,14 +28,11 @@ const corsOptions ={
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(compression());
-app.options('*', cors(corsOptions));
 
+// Set CORS headers
 app.use((req, res, next) => {
   res.setHeader('Referrer-Policy', 'no-referrer');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader("Access-Control-Allow-Methods", "*");
-  res.setHeader("Access-Control-Allow-Headers", "*");
-  res.setHeader('Content-Security-Policy', 'unsafe-url');
+  res.setHeader('Content-Security-Policy', 'default-src *');
   next();
 });
 
