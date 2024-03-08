@@ -11,7 +11,7 @@ const diagnoseConditions = new mongoose.Schema({
         id: Number,
         title: String,
         url: String,
-        label: String,
+        label: String,  
         value: String,
         },
     ],

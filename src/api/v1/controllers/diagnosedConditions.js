@@ -1,4 +1,6 @@
+const expressAsyncHandler = require('express-async-handler');
 const DiagnoseConditionsModel = require('../models/diagnosedConditions');
+const xlsx = require('xlsx');
 
 // Get all DiagnosedConditions
 const getAllDiagnosedConditions = async (req, res) => {
@@ -34,19 +36,6 @@ const createDiagnosedConditions = async (req, res) => {
     } catch (error) {
       res.status(500).json({ error: 'Internal server error' });
     }
-};
-
-// Delete a diagnosedCondition by ID
-const createManyDiagnosedConditions = async (req, res) => {
-  try {
-    const diagnosedCondition = await DiagnoseConditionsModel.insertMany(req.body);
-    if (!diagnosedCondition) {
-      return res.status(404).json({ error: 'diagnosedCondition not found' });
-    }
-    res.json({ message: 'diagnosedCondition deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
-  }
 };
 
 const updateDiagnosedConditions = async (req, res) => {
@@ -104,6 +93,71 @@ const searchDiagnosedCondition = async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
 };
+
+const createManyDiagnosedConditions = expressAsyncHandler(async (req, res) => {
+  if (!req.file) {
+    return res.status(400).send('No file uploaded.');
+  }
+  
+  const workbook = xlsx.read(req.file.buffer);
+  const worksheetName = workbook.SheetNames[0];
+  const worksheet = workbook.Sheets[worksheetName];
+  const jsonData = xlsx.utils.sheet_to_json(worksheet);
+
+  if (worksheetName === "diagnosedCondition") {
+    const existingConditions = await DiagnoseConditionsModel.find().select('title -_id');
+    const existingTitles = new Set(existingConditions.map(cond => cond.title));
+
+    const validatedData = jsonData.filter(obj => !existingTitles.has(obj.title)).map(obj => {
+      // Convert comma-separated aliases to arrays and ensure all fields are validated
+      if (typeof obj.aliases === 'string') {
+        obj.aliases = obj.aliases.split(',');
+      }
+
+      // Validate each field according to the schema
+      const validatedObj = {
+        title: typeof obj.title === 'string' ? obj.title : null,
+        description: typeof obj.description === 'string' ? obj.description : '',
+        imageUrl: typeof obj.imageUrl === 'string' ? obj.imageUrl : '',
+        aliases: Array.isArray(obj.aliases) ? obj.aliases.filter(alias => typeof alias === 'string') : [],
+        isActive: typeof obj.isActive === 'boolean' ? obj.isActive : false,
+        healthTopicLinks: Array.isArray(obj.healthTopicLinks) ? obj.healthTopicLinks.map(link => ({
+          id: typeof link.id === 'number' ? link.id : null,
+          title: typeof link.title === 'string' ? link.title : '',
+          url: typeof link.url === 'string' ? link.url : '',
+          label: typeof link.label === 'string' ? link.label : '',
+          value: typeof link.value === 'string' ? link.value : '',
+        })).filter(link => link.id !== null) : [],
+      };
+
+      // Only proceed with objects that have a valid title
+      return validatedObj.title ? validatedObj : null;
+    }).filter(obj => obj !== null);
+
+    const chunkedData = [];
+    for (let i = 0; i < validatedData.length; i += 50) {
+      chunkedData.push(validatedData.slice(i, i + 50));
+    }
+
+    const results = [];
+    for (const chunk of chunkedData) {
+      const updates = chunk.map(item => ({
+        updateOne: {
+          filter: { title: item.title },
+          update: item,
+          upsert: true
+        }
+      }));
+
+      const result = await DiagnoseConditionsModel.bulkWrite(updates);
+      results.push(result);
+    }
+
+    res.status(200).json(results);
+  } else {
+    res.status(400).send("Incorrect worksheet name. Please use 'diagnosedCondition'.");
+  }
+});
 
 module.exports = {
   getAllDiagnosedConditions,
