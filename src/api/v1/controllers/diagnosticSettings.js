@@ -34,15 +34,20 @@ const createDiagnosticSetting = async (req, res) => {
 const updateDiagnosticSetting = async (req, res) => {
   const { key } = req.body;
   try {
-    const diagnosticSetting = await DiagnosticSettingsModel.findOneAndUpdate({key:key},req.body, { new: true });
-    if (!diagnosticSetting) {
-      return res.status(404).json({ error: 'diagnosticSetting not found' });
-    }
+    // Update the existing diagnosticSetting document or create a new one if it doesn't exist
+    const diagnosticSetting = await DiagnosticSettingsModel.findOneAndUpdate(
+      { key: key }, // filter
+      req.body, // update with the full request body
+      { new: true, upsert: true } // options: return the updated document and upsert
+    );
+    
+    // Since upsert is true, diagnosticSetting will always be defined, either as the updated or the newly created document
     res.json(diagnosticSetting);
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error' + error });
   }
 };
+
 
 module.exports = {
   getDiagnosticSetting,

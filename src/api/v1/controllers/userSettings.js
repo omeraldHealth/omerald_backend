@@ -32,15 +32,19 @@ const createUserSetting = async (req, res) => {
 
 // Update a userSetting by ID
 const updateUserSetting = async (req, res) => {
-  const { key } = req.body;
+  const { key, value } = req.body;
   try {
-    const userSetting = await UserSettingsModel.findOneAndUpdate({key:key},req.body, { new: true });
-    if (!userSetting) {
-      return res.status(404).json({ error: 'userSetting not found' });
-    }
+    // Use findOneAndUpdate with upsert: true to either update the existing document or create a new one if it doesn't exist
+    const userSetting = await UserSettingsModel.findOneAndUpdate(
+      { key: key }, // filter
+      { $set: { key: key, value: value } }, // update
+      { new: true, upsert: true } // options
+    );
+    
+    // No need to check if userSetting exists here because findOneAndUpdate with upsert will always return a document
     res.json(userSetting);
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error' + error });
   }
 };
 
