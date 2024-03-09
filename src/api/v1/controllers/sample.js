@@ -88,16 +88,44 @@ const updateSample = async (req, res) => {
 };
 
 // Delete a sample by ID
+// const deleteSample = async (req, res) => {
+//   const { id } = req.params;
+//   try {
+//     const sample = await SampleModel.findByIdAndDelete(id);
+//     if (!sample) {
+//       return res.status(404).json({ error: 'sample not found' });
+//     }
+//     res.json({ message: 'sample deleted successfully' });
+//   } catch (error) {
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// };
 const deleteSample = async (req, res) => {
   const { id } = req.params;
   try {
-    const sample = await SampleModel.findByIdAndDelete(id);
+    // Fetch the current user to get the phoneNumber
+    const sample = await SampleModel.findById(id);
+    
     if (!sample) {
-      return res.status(404).json({ error: 'sample not found' });
+      throw new Error('sample not found');
     }
-    res.json({ message: 'sample deleted successfully' });
+
+    // Append current timestamp to phoneNumber
+    const timestamp = Date.now();
+    const updatedName = `${sample.name}*${timestamp}`;
+
+    // Update phoneNumber and set deletedAt
+    await User.updateOne({ _id: id }, {
+      $set: {
+        name: updatedName,
+        deletedAt: new Date()
+      }
+    });
+
+    res.json({ message: 'User deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
+    // Handle error appropriately
   }
 };
 

@@ -11,7 +11,14 @@ const doses = new mongoose.Schema({
     ref: 'vaccines',
   },
   type: Number, // 1 = Recommended age, 2 = Catch up age range, 3 = Vaccine in special situations
+  deletedAt: { type: Date, default: null },
 });
+
+doses.pre(/^find/, function(next) {
+  this.where({ deletedAt: null });
+  next();
+});
+
 
 mongoose.models = {};
 

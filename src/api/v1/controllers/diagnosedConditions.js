@@ -51,18 +51,48 @@ const updateDiagnosedConditions = async (req, res) => {
     }
 };
 
+// const deleteDiagnosedCondition = async (req, res) => {
+//     const { id } = req.params;
+//     try {
+//       const diagnosedCondition = await DiagnoseConditionsModel.findByIdAndDelete(id);
+//       if (!diagnosedCondition) {
+//         return res.status(404).json({ error: 'diagnosedCondition not found' });
+//       }
+//       res.json({ message: 'diagnosedCondition deleted successfully' });
+//     } catch (error) {
+//       res.status(500).json({ error: 'Internal server error' });
+//     }
+// };
+
 const deleteDiagnosedCondition = async (req, res) => {
-    const { id } = req.params;
-    try {
-      const diagnosedCondition = await DiagnoseConditionsModel.findByIdAndDelete(id);
-      if (!diagnosedCondition) {
-        return res.status(404).json({ error: 'diagnosedCondition not found' });
-      }
-      res.json({ message: 'diagnosedCondition deleted successfully' });
-    } catch (error) {
-      res.status(500).json({ error: 'Internal server error' });
+  const { id } = req.params;
+  try {
+    // Fetch the current user to get the phoneNumber
+    const doses = await DiagnoseConditionsModel.findById(id);
+    
+    if (!doses) {
+      throw new Error('parameter not found');
     }
+
+    // Append current timestamp to phoneNumber
+    const timestamp = Date.now();
+    const updatedName = `${doses.title}*${timestamp}`;
+
+    // Update phoneNumber and set deletedAt
+    await DiagnoseConditionsModel.updateOne({ _id: id }, {
+      $set: {
+        title: updatedName,
+        deletedAt: new Date()
+      }
+    });
+
+    res.json({ message: 'Diagnosed Condition deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+    // Handle error appropriately
+  }
 };
+
 
 const searchDiagnosedCondition = async (req, res) => {
     const { query = '', page = 1 } = req.params;

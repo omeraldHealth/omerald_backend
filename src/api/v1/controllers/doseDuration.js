@@ -82,18 +82,35 @@ const updateDoseDuration = async (req, res) => {
 };
 
 // Delete a DoseDuration by ID
+// const deleteDoseDuration = async (req, res) => {
+//   const { id } = req.params;
+//   try {
+//     const doseDuration = await DoseDuration.findByIdAndDelete(id);
+//     if (!doseDuration) {
+//       return res.status(404).json({ error: 'DoseDuration not found' });
+//     }
+//     res.json({ message: 'DoseDuration deleted successfully' });
+//   } catch (error) {
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// };
+
 const deleteDoseDuration = async (req, res) => {
   const { id } = req.params;
   try {
-    const doseDuration = await DoseDuration.findByIdAndDelete(id);
+    // Fetch the current user to get the phoneNumber
+    const doseDuration = await DoseDuration.findByIdAndUpdate(id ,  {deletedAt: Date.now()});
     if (!doseDuration) {
       return res.status(404).json({ error: 'DoseDuration not found' });
     }
+
     res.json({ message: 'DoseDuration deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
+    // Handle error appropriately
   }
 };
+
 
 module.exports = {
   getDoseDuration,

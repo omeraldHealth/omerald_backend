@@ -29,7 +29,13 @@ const parameters = new mongoose.Schema({
     }
   }],
   isActive: { type: Boolean, default: false },
-});
+  deletedAt: { type: Date, default: null },
+  });
+  
+  parameters.pre(/^find/, function(next) {
+    this.where({ deletedAt: null });
+    next();
+  });
 
 mongoose.models = {};
 

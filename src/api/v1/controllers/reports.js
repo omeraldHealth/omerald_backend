@@ -130,18 +130,47 @@ const updateReport = async (req, res) => {
 };
 
 // Delete a report by ID
+// const deletereport = async (req, res) => {
+//   const { id } = req.params;
+//   try {
+//     const report = await ReportsModel.findByIdAndDelete(id);
+//     if (!report) {
+//       return res.status(404).json({ error: 'report not found' });
+//     }
+//     res.json({ message: 'report deleted successfully' });
+//   } catch (error) {
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// };
 const deletereport = async (req, res) => {
   const { id } = req.params;
   try {
-    const report = await ReportsModel.findByIdAndDelete(id);
+    // Fetch the current user to get the phoneNumber
+    const report = await ReportsModel.findById(id);
+    
     if (!report) {
-      return res.status(404).json({ error: 'report not found' });
+      throw new Error('sample not found');
     }
-    res.json({ message: 'report deleted successfully' });
+
+    // Append current timestamp to phoneNumber
+    const timestamp = Date.now();
+    const updatedName = `${report.name}*${timestamp}`;
+
+    // Update phoneNumber and set deletedAt
+    await ReportsModel.updateOne({ _id: id }, {
+      $set: {
+        name: updatedName,
+        deletedAt: new Date()
+      }
+    });
+
+    res.json({ message: 'Report deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
+    // Handle error appropriately
   }
 };
+
 
 module.exports = {
   getReport,

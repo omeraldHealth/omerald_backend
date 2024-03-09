@@ -91,18 +91,47 @@ const updateParameter = async (req, res) => {
 };
 
 // Delete a parameter by ID
+// const deleteparameter = async (req, res) => {
+//   const { id } = req.params;
+//   try {
+//     const parameter = await ParametersModel.findByIdAndDelete(id);
+//     if (!parameter) {
+//       return res.status(404).json({ error: 'parameter not found' });
+//     }
+//     res.json({ message: 'parameter deleted successfully' });
+//   } catch (error) {
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// };
 const deleteparameter = async (req, res) => {
   const { id } = req.params;
   try {
-    const parameter = await ParametersModel.findByIdAndDelete(id);
+    // Fetch the current user to get the phoneNumber
+    const parameter = await ParametersModel.findById(id);
+    
     if (!parameter) {
-      return res.status(404).json({ error: 'parameter not found' });
+      throw new Error('parameter not found');
     }
-    res.json({ message: 'parameter deleted successfully' });
+
+    // Append current timestamp to phoneNumber
+    const timestamp = Date.now();
+    const updatedName = `${parameter.name}*${timestamp}`;
+
+    // Update phoneNumber and set deletedAt
+    await ParametersModel.updateOne({ _id: id }, {
+      $set: {
+        name: updatedName,
+        deletedAt: new Date()
+      }
+    });
+
+    res.json({ message: 'Parameter deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
+    // Handle error appropriately
   }
 };
+
 
 const searchParameter = async (req, res) => {
     const { query = '', page = 1 } = req.params;

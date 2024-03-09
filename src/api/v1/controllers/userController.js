@@ -51,18 +51,62 @@ const updateUser = async (req, res) => {
 };
 
 // Delete a user by ID
+// const deleteUser = async (req, res) => {
+//   const { id } = req.params;
+//   try {
+//     const user = await User.findByIdAndDelete(id);
+//     if (!user) {
+//       return res.status(404).json({ error: 'User not found' });
+//     }
+//     res.json({ message: 'User deleted successfully' });
+//   } catch (error) {
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// };
+
+//Using soft delete for user
 const deleteUser = async (req, res) => {
   const { id } = req.params;
   try {
-    const user = await User.findByIdAndDelete(id);
+    // Fetch the current user to get the phoneNumber
+    const user = await User.findById(id);
+    
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      throw new Error('User not found');
     }
+
+    // Append current timestamp to phoneNumber
+    const timestamp = Date.now();
+    const updatedPhoneNumber = `${user.phoneNumber}*${timestamp}`;
+
+    // Update phoneNumber and set deletedAt
+    await User.updateOne({ _id: id }, {
+      $set: {
+        phoneNumber: updatedPhoneNumber,
+        deletedAt: new Date()
+      }
+    });
+
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
+    // Handle error appropriately
   }
 };
+
+const revertDeleteUser = async (req, res) => {
+  const { id } = req.params;
+  try {
+        const user = await User.findByIdAndUpdate(id,{ deletedAt:null });
+        if (!user) {
+          return res.status(404).json({ error: 'User not found' });
+        }
+        res.json({ message: 'User deleted successfully' });
+    } catch (error) {
+      res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 
 module.exports = {
   getUsers,
@@ -70,4 +114,5 @@ module.exports = {
   createUser,
   updateUser,
   deleteUser,
+  revertDeleteUser
 };

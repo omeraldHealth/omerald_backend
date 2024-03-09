@@ -9,7 +9,13 @@ const userActivitySchema = new mongoose.Schema({
   },
   target: { type: String, required: true }, // e.g., 'branch "apollo jay"'
   details: { type: String }, // Additional details if needed, for example, specifics of what was created, updated, etc.
-  timestamp: { type: Date, default: Date.now } // Automatically capture the time of the activity
+  timestamp: { type: Date, default: Date.now }, // Automatically capture the time of the activity
+  deletedAt: { type: Date, default: null },
+});
+
+userActivitySchema.pre(/^find/, function(next) {
+  this.where({ deletedAt: null });
+  next();
 });
 
 // Optionally, you might want to index fields commonly queried upon

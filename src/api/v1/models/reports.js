@@ -21,7 +21,13 @@ var reports = new mongoose.Schema({
     },
   ],
   isActive: { type: Boolean, default: false },
-});
+  deletedAt: { type: Date, default: null },
+  });
+  
+  reports.pre(/^find/, function(next) {
+    this.where({ deletedAt: null });
+    next();
+  });
 
 mongoose.models = {};
 

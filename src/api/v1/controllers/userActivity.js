@@ -57,16 +57,32 @@ const updateActivity = async (req, res) => {
 };
 
 // Delete an activity by ID
+// const deleteActivity = async (req, res) => {
+//   const { id } = req.params;
+//   try {
+//     const activity = await UserActivity.findByIdAndDelete(id);
+//     if (!activity) {
+//       return res.status(404).json({ error: 'Activity not found' });
+//     }
+//     res.json({ message: 'Activity deleted successfully' });
+//   } catch (error) {
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// };
+
 const deleteActivity = async (req, res) => {
   const { id } = req.params;
   try {
-    const activity = await UserActivity.findByIdAndDelete(id);
+    // Fetch the current user to get the phoneNumber
+    const activity = await UserActivity.findByIdAndUpdate(id, { deletedAt: new Date()});
+     
     if (!activity) {
-      return res.status(404).json({ error: 'Activity not found' });
+      throw new Error('activity not found');
     }
     res.json({ message: 'Activity deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
+    // Handle error appropriately
   }
 };
 

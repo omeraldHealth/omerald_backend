@@ -121,18 +121,47 @@ const updatedosess = async (req, res) => {
     }
 };
 
+// const deletedoses = async (req, res) => {
+//     const { id } = req.params;
+//     try {
+//       const doses = await DosesModel.findByIdAndDelete(id);
+//       if (!doses) {
+//         return res.status(404).json({ error: 'doses not found' });
+//       }
+//       res.json({ message: 'doses deleted successfully' });
+//     } catch (error) {
+//       res.status(500).json({ error: 'Internal server error' });
+//     }
+// };
 const deletedoses = async (req, res) => {
-    const { id } = req.params;
-    try {
-      const doses = await DosesModel.findByIdAndDelete(id);
-      if (!doses) {
-        return res.status(404).json({ error: 'doses not found' });
-      }
-      res.json({ message: 'doses deleted successfully' });
-    } catch (error) {
-      res.status(500).json({ error: 'Internal server error' });
+  const { id } = req.params;
+  try {
+    // Fetch the current user to get the phoneNumber
+    const doses = await DosesModel.findById(id);
+    
+    if (!doses) {
+      throw new Error('parameter not found');
     }
+
+    // Append current timestamp to phoneNumber
+    const timestamp = Date.now();
+    const updatedName = `${doses.name}*${timestamp}`;
+
+    // Update phoneNumber and set deletedAt
+    await DosesModel.updateOne({ _id: id }, {
+      $set: {
+        name: updatedName,
+        deletedAt: new Date()
+      }
+    });
+
+    res.json({ message: 'Doses deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+    // Handle error appropriately
+  }
 };
+
 
 module.exports = {
   getAlldosess,

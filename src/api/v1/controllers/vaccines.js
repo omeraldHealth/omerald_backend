@@ -74,16 +74,44 @@ const updateVaccine = async (req, res) => {
 };
 
 // Delete a Vaccine by ID
+// const deleteVaccine = async (req, res) => {
+//   const { id } = req.params;
+//   try {
+//     const vaccine = await VaccinesModel.findByIdAndDelete(id);
+//     if (!vaccine) {
+//       return res.status(404).json({ error: 'Vaccine not found' });
+//     }
+//     res.json({ message: 'vaccine deleted successfully' });
+//   } catch (error) {
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// };
 const deleteVaccine = async (req, res) => {
   const { id } = req.params;
   try {
-    const vaccine = await VaccinesModel.findByIdAndDelete(id);
+    // Fetch the current user to get the phoneNumber
+    const vaccine = await VaccinesModel.findById(id);
+    
     if (!vaccine) {
-      return res.status(404).json({ error: 'Vaccine not found' });
+      throw new Error('User not found');
     }
-    res.json({ message: 'vaccine deleted successfully' });
+
+    // Append current timestamp to phoneNumber
+    const timestamp = Date.now();
+    const updatedPhoneNumber = `${vaccine.name}*${timestamp}`;
+
+    // Update phoneNumber and set deletedAt
+    await VaccinesModel.updateOne({ _id: id }, {
+      $set: {
+        phoneNumber: updatedPhoneNumber,
+        deletedAt: new Date()
+      }
+    });
+
+    res.json({ message: 'Vaccine deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
+    // Handle error appropriately
   }
 };
 

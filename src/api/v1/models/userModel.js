@@ -14,6 +14,12 @@ const userSchema = new mongoose.Schema({
     type: String, 
     default: 'sme' 
   },
+  deletedAt: { type: Date, default: null },
+});
+
+userSchema.pre(/^find/, function(next) {
+  this.where({ deletedAt: null });
+  next();
 });
 
 const UserTable = mongoose.model('User', userSchema);

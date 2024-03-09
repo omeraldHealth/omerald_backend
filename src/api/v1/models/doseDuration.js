@@ -5,7 +5,13 @@ const doseDurations = new mongoose.Schema({
     type: {type: String, required: true},
     value: {type: String, required: true}
    },
-});
+   deletedAt: { type: Date, default: null },
+  });
+  
+  doseDurations.pre(/^find/, function(next) {
+    this.where({ deletedAt: null });
+    next();
+  });
 
 mongoose.models = {};
 
