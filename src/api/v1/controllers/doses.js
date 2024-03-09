@@ -79,7 +79,6 @@ const createManyDoses = async (req, res) => {
           vaccineDoc = vaccine;
         }
       }
-      console.log(dose,durationDoc,vaccineDoc);
       // if (typeof dose.type !== 'number') {
       //   return undefined; // Skip this entry if 'type' is not correctly formatted
       // }
