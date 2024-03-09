@@ -5,12 +5,25 @@ const samples = new mongoose.Schema({
   description: { type: String },
   imageUrl: { type: String },
   deletedAt: { type: Date, default: null },
+  validity: {
+    value: {
+      type: Number,
+      required: true,
+      min: 1, // Assuming validity must be at least 1 unit
+    },
+    unit: {
+      type: String,
+      required: true,
+      enum: ['minutes','hours', 'days', 'months', 'years'], // Restrict to these units
+    },
+  },
+
   });
   
-  samples.pre(/^find/, function(next) {
+samples.pre(/^find/, function(next) {
     this.where({ deletedAt: null });
     next();
-  });
+});
 mongoose.models = {};
 
 const SamplesModel = mongoose.model('samples', samples);

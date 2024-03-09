@@ -13,11 +13,6 @@ const userActivitySchema = new mongoose.Schema({
   deletedAt: { type: Date, default: null },
 });
 
-userActivitySchema.pre(/^find/, function(next) {
-  this.where({ deletedAt: null });
-  next();
-});
-
 // Optionally, you might want to index fields commonly queried upon
 userActivitySchema.index({ userName: 1, timestamp: -1 });
 
