@@ -18,11 +18,6 @@ const diagnoseConditions = new mongoose.Schema({
     deletedAt: { type: Date, default: null },
 });
 
-diagnoseConditions.pre(/^find/, function(next) {
-  this.where({ deletedAt: null });
-  next();
-});
-
 
 const DiagnoseConditionsModel = mongoose.model('diagnoseConditions', diagnoseConditions);
 

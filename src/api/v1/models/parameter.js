@@ -32,10 +32,6 @@ const parameters = new mongoose.Schema({
   deletedAt: { type: Date, default: null },
   });
   
-  parameters.pre(/^find/, function(next) {
-    this.where({ deletedAt: null });
-    next();
-  });
 
 mongoose.models = {};
 

@@ -5,11 +5,6 @@ const vaccine = new mongoose.Schema({
     deletedAt: { type: Date, default: null },
 });
 
-vaccine.pre(/^find/, function(next) {
-  this.where({ deletedAt: null });
-  next();
-});
-
 mongoose.models = {};
 
 const VaccinesModel = mongoose.model('vaccines', vaccine);

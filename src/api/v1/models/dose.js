@@ -14,12 +14,6 @@ const doses = new mongoose.Schema({
   deletedAt: { type: Date, default: null },
 });
 
-doses.pre(/^find/, function(next) {
-  this.where({ deletedAt: null });
-  next();
-});
-
-
 mongoose.models = {};
 
 const DoseModel = mongoose.model('doses', doses);

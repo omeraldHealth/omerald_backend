@@ -24,11 +24,6 @@ var reports = new mongoose.Schema({
   deletedAt: { type: Date, default: null },
   });
   
-  reports.pre(/^find/, function(next) {
-    this.where({ deletedAt: null });
-    next();
-  });
-
 mongoose.models = {};
 
 var ReportsModel = mongoose.model('reports', reports);

@@ -7,11 +7,6 @@ const params = {
     range: {type:String}
 }
 
-const analysedParams = new mongoose.Schema({
-    file: { type: String },
-    parsedData: [params]
-});
-
 const AnalysedParams = mongoose.model('parsedparams', analysedParams);
 
 module.exports = AnalysedParams;
