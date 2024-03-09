@@ -3,7 +3,7 @@ const xlsx = require('xlsx');
 // Get all Vaccine
 const getVaccine = async (req, res) => {
   try {
-    const vaccine = await VaccinesModel.find();
+    const vaccine = await VaccinesModel.find({deletedAt: null});
     res.json(vaccine);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
@@ -73,19 +73,6 @@ const updateVaccine = async (req, res) => {
   }
 };
 
-// Delete a Vaccine by ID
-// const deleteVaccine = async (req, res) => {
-//   const { id } = req.params;
-//   try {
-//     const vaccine = await VaccinesModel.findByIdAndDelete(id);
-//     if (!vaccine) {
-//       return res.status(404).json({ error: 'Vaccine not found' });
-//     }
-//     res.json({ message: 'vaccine deleted successfully' });
-//   } catch (error) {
-//     res.status(500).json({ error: 'Internal server error' });
-//   }
-// };
 const deleteVaccine = async (req, res) => {
   const { id } = req.params;
   try {

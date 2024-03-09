@@ -6,7 +6,7 @@ const xlsx = require('xlsx');
 // Get all dosess
 const getAlldosess = async (req, res) => {
   try {
-    const doses = await DosesModel.find()
+    const doses = await DosesModel.find({deletedAt: null})
     .populate('duration', 'duration _id')
     .populate('vaccine', 'name _id')
     .exec();
@@ -20,7 +20,7 @@ const getAlldosess = async (req, res) => {
 const getdosesById = async (req, res) => {
     try {
         const { id } = req.params;
-        const doses = await DosesModel.findById(id)
+        const doses = await DosesModel.findById({ deletedAt: null, _id: id})
         .populate('duration', 'duration _id')
         .populate('vaccine', 'name _id')
         .exec();

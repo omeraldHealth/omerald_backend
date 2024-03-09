@@ -8,7 +8,7 @@ const ReportsModel = require('../models/reports');
 // Get all report
 const getReport = async (req, res) => {
   try {
-    const report = await ReportsModel.find()
+    const report = await ReportsModel.find({  deletedAt: null })
     .populate({
       path: 'sample',
       select: 'name',

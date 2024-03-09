@@ -5,7 +5,7 @@ const xlsx = require('xlsx');
 // Get all DoseDuration
 const getDoseDuration = async (req, res) => {
   try {
-    const doseDuration = await DoseDuration.find();
+    const doseDuration = await DoseDuration.find({deletedAt: null});
     res.json(doseDuration);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });

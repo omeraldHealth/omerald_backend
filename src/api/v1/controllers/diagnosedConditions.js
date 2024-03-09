@@ -5,7 +5,7 @@ const xlsx = require('xlsx');
 // Get all DiagnosedConditions
 const getAllDiagnosedConditions = async (req, res) => {
   try {
-    const diagnosedCondition = await DiagnoseConditionsModel.find();
+    const diagnosedCondition = await DiagnoseConditionsModel.find({ deletedAt: null });
     res.json(diagnosedCondition);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
@@ -16,7 +16,7 @@ const getAllDiagnosedConditions = async (req, res) => {
 const getDiagnosedConditionById = async (req, res) => {
     try {
         const { id } = req.params;
-        const diagnosedCondition = await DiagnoseConditionsModel.findById(id);
+        const diagnosedCondition = await DiagnoseConditionsModel.findById({deletedAt: null, _id: id});
         res.json(diagnosedCondition);
       } catch (error) {
         res.status(500).json({ error: 'Internal server error' });

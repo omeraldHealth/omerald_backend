@@ -3,7 +3,7 @@ const User = require('../models/userModel');
 // Get all users
 const getUsers = async (req, res) => {
   try {
-    const users = await User.find();
+    const users = await User.find({deletedAt: null});
     res.json(users);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
@@ -15,7 +15,7 @@ const getUserByPhoneNumber = async (req, res) => {
     const { phoneNumber } = req.params;
 
     try {
-      const user = await User.findOne({ phoneNumber });
+      const user = await User.findOne({ phoneNumber: phoneNumber, deletedAt: null });
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }

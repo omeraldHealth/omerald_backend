@@ -3,7 +3,7 @@ const DiagnosticSettingsModel = require('../models/diagnosticSettings');
 // Get all diagnosticSetting
 const getDiagnosticSetting = async (req, res) => {
   try {
-    const diagnosticSetting = await DiagnosticSettingsModel.find();
+    const diagnosticSetting = await DiagnosticSettingsModel.find({});
     res.json(diagnosticSetting);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });

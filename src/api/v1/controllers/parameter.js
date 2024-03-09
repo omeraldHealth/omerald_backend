@@ -4,7 +4,7 @@ const xlsx = require('xlsx');
 // Get all parameter
 const getParameter = async (req, res) => {
   try {
-    const parameter = await ParametersModel.find();
+    const parameter = await ParametersModel.find({ deletedAt: null });
     res.json(parameter);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
@@ -90,19 +90,6 @@ const updateParameter = async (req, res) => {
   }
 };
 
-// Delete a parameter by ID
-// const deleteparameter = async (req, res) => {
-//   const { id } = req.params;
-//   try {
-//     const parameter = await ParametersModel.findByIdAndDelete(id);
-//     if (!parameter) {
-//       return res.status(404).json({ error: 'parameter not found' });
-//     }
-//     res.json({ message: 'parameter deleted successfully' });
-//   } catch (error) {
-//     res.status(500).json({ error: 'Internal server error' });
-//   }
-// };
 const deleteparameter = async (req, res) => {
   const { id } = req.params;
   try {
@@ -139,7 +126,7 @@ const searchParameter = async (req, res) => {
     const skip = (page - 1) * pageSize;
     try {
         const results = await ParametersModel.find({
-            name: { $regex: query, $options: 'i' }
+            name: { $regex: query, $options: 'i' }, deletedAt: null,
           })
             .skip(skip)
             .limit(pageSize)
