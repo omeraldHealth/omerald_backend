@@ -4,10 +4,12 @@ var reports = new mongoose.Schema({
   name: { type: String, required: true },
   description: { type: String },
   imageUrl: { type: String },
-  sample: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'samples',
-  },
+  sample: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'samples',
+    },
+  ],
   diagnoseConditions: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -22,7 +24,7 @@ var reports = new mongoose.Schema({
   ],
   isActive: { type: Boolean, default: false },
   deletedAt: { type: Date, default: null },
-  });
+});
   
 mongoose.models = {};
 

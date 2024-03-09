@@ -20,6 +20,10 @@ const getReport = async (req, res) => {
       select: 'name units.value bioRefRange aliases',
       // populate: { path: "units" },
       model: ParametersModel,
+    }).populate({
+      path: 'diagnoseConditions',
+      select: 'title',
+      model: DiagnoseConditionsModel,
     })
     .exec();;
     res.json(report);
