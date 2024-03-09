@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const params = {
+const analysedParams = {
     name: {type:String},
     value: {type: String},
     unit:{type:String},
