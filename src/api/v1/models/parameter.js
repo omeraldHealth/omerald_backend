@@ -1,31 +1,81 @@
 const mongoose = require('mongoose');
 
+
 const parameters = new mongoose.Schema({
   name: { type: String, required: true },
   description: { type: String },
   aliases: { type: [String] },
   units: {type: String},
   bioRefRange: [{
-    rangeType: {type:String},
-    min: {type:Number},
-    max:{type:Number},
+    basicRange: {
+      min: {type:Number},
+      max:{type:Number},
+    },
     advanceRange: {
-        reportType:  {type:String},
-        genderType:  {type:String},
-        ageRanges: [
+        ageRange: [
           {
-            ageRangeType:  {type:String},
+            ageRangeType: { 
+              type: String, 
+              enum: ['pediatric', 'senior', 'adult'], // Ensures only these values are allowed
+              required: true 
+            },
+            unit: {type:String},
             min: {type:Number},
             max:{type:Number},
           }
         ],
-        criticality:[
+        genderRange:  [
           {
-            criticalityType: {type:String},
+            generRangeType: { 
+              type: String, 
+              enum: ['male', 'female', 'other'], // Ensures only these values are allowed
+              required: true 
+            },
+            unit: {type:String},
             min: {type:Number},
             max:{type:Number},
+            details: {
+              menopause: { 
+                type: Boolean, 
+                default: false,
+              },
+              pregnant: { 
+                type: Boolean, 
+                default: false
+              },
+              trimester: {
+                type: {
+                  type: String,
+                  enum: ['first', 'second', 'third', 'none'],
+                  default: 'none',
+                },
+                  unit: { type: String },
+                  min: { type: String },
+                  max: { type: String },
+              },
+              prePuberty: { 
+                type: Boolean, 
+                default: false,
+              }
+            }
           }
-        ]
+        ],
+        customCategory: [{
+          categoryName: { type: String },
+          subCategory: {categoryName: String,
+            categoryOptions: [{
+              categoryType: { type: String },
+              min: { type: Number },
+              max: { type: Number },
+              unit: { type: String }
+          }]}, // Recursive relationship
+          categoryOptions: [{
+            categoryType: { type: String },
+            min: { type: Number },
+            max: { type: Number },
+            unit: { type: String }
+          }]
+        }]
     }
   }],
   isActive: { type: Boolean, default: false },

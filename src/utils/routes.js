@@ -12,6 +12,7 @@ const userSettingRouter = require("../api/v1/routes/userSettingRouter");
 const diagSettingRouter = require("../api/v1/routes/diagnosticSettingRouter");
 const healthRouter = require("../api/v1/routes/healthRoute");
 const activityRouter = require("../api/v1/routes/activityRouter");
+const categoryRouter = require("../api/v1/routes/categoryRouter");
 
 module.exports = {
   userRoutes,
@@ -27,5 +28,6 @@ module.exports = {
   userSettingRouter,
   diagSettingRouter,
   healthRouter,
-  activityRouter
+  activityRouter,
+  categoryRouter
 };

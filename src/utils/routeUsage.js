@@ -17,5 +17,6 @@ router.use('/api/v1/userSettings', routeImports.userSettingRouter);
 router.use('/api/v1/diagSettings', routeImports.diagSettingRouter);
 router.use('/api/v1/health', routeImports.healthRouter);
 router.use('/api/v1/activity', routeImports.activityRouter);
+router.use('/api/v1/category', routeImports.categoryRouter);
 
 module.exports = router;
