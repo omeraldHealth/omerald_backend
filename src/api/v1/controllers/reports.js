@@ -11,7 +11,7 @@ const getReport = async (req, res) => {
     const report = await ReportsModel.find({  deletedAt: null })
     .populate({
       path: 'sample',
-      select: 'name',
+      select: 'name description validity',
       model: SamplesModel,
       options: { alias: 'sampleName' },
     })
@@ -22,7 +22,7 @@ const getReport = async (req, res) => {
       model: ParametersModel,
     }).populate({
       path: 'diagnoseConditions',
-      select: 'title',
+      select: 'title description aliases',
       model: DiagnoseConditionsModel,
     })
     .exec();;

@@ -33,7 +33,7 @@ const createManyVaccines = async (req, res) => {
 
   if (worksheetName === "vaccines") { // Ensure the correct worksheet name is used
     // Fetch existing vaccine names to avoid duplicates
-    const existingVaccines = await VaccinesModel.find().select('name -_id');
+    const existingVaccines = await VaccinesModel.find({deletedAt:null}).select('name -_id');
     const existingNames = new Set(existingVaccines.map(vaccine => vaccine.name));
 
     // Validate and filter out existing names
