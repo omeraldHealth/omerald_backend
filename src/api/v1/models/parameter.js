@@ -6,11 +6,12 @@ const parameters = new mongoose.Schema({
   description: { type: String },
   aliases: { type: [String] },
   units: {type: String},
-  bioRefRange: [{
-    basicRange: {
+  bioRefRange: {
+    basicRange: [{
       min: {type:Number},
       max:{type:Number},
-    },
+      unit:{type:String},
+    }],
     advanceRange: {
         ageRange: [
           {
@@ -77,7 +78,8 @@ const parameters = new mongoose.Schema({
           }]
         }]
     }
-  }],
+  },
+  remedy: {type: String},
   isActive: { type: Boolean, default: false },
   deletedAt: { type: Date, default: null },
   });
