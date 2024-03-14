@@ -50,9 +50,6 @@ const parameters = new mongoose.Schema({
                   enum: ['first', 'second', 'third', 'none'],
                   default: 'none',
                 },
-                  unit: { type: String },
-                  min: { type: String },
-                  max: { type: String },
               },
               prePuberty: { 
                 type: Boolean, 
@@ -82,7 +79,7 @@ const parameters = new mongoose.Schema({
   remedy: {type: String},
   isActive: { type: Boolean, default: false },
   deletedAt: { type: Date, default: null },
-  });
+});
   
 
 mongoose.models = {};
