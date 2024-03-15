@@ -15,6 +15,7 @@ const getSample = async (req, res) => {
 // Create a new sample
 const createSample = async (req, res) => {
   const { name ,description,imageUrl, validity} = req.body;
+  console.log(validity)
   try {
     const sample = await SampleModel.create({name,description,imageUrl,validity});
     res.status(201).json(sample);

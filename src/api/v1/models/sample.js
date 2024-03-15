@@ -1,25 +1,32 @@
 const mongoose = require("mongoose")
 
+const createUnitValidator = (unitName) => ({
+  type: Number,
+  default: 0,
+  validate: {
+    validator: function(value) {
+      return value >= 0;
+    },
+    message: props => `${props.value} is not a valid ${unitName}!`
+  }
+});
+
+const validitySchema = {
+  year: createUnitValidator('year'),
+  month: createUnitValidator('month'),
+  week: createUnitValidator('week'),
+  day: createUnitValidator('day'),
+  hour: createUnitValidator('hour')
+};
+
 const samples = new mongoose.Schema({
   name: { type: String, required: true, unique: true },
   description: { type: String },
   imageUrl: { type: String },
   deletedAt: { type: Date, default: null },
   isActive: { type: Boolean, default: true },
-  validity: {
-    value: {
-      type: Number,
-      required: true,
-      min: 1, // Assuming validity must be at least 1 unit
-    },
-    unit: {
-      type: String,
-      required: true,
-      enum: ['minutes','hours', 'days', 'months', 'years'], // Restrict to these units
-    },
-  },
-
-  });
+  validity: validitySchema, 
+});
   
 mongoose.models = {};
 
