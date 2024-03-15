@@ -10,7 +10,8 @@ const getParameter = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-
+const isValidNumber = (value) => !isNaN(value) && Number.isFinite(value);
+const isValidUnit = (unit) => typeof unit === 'string' && unit.trim() !== '';
 // Create a new parameter
 const createParameter = async (req, res) => {
   const { name,description,aliases,units,bioRefRange,isActive, remedy } = req.body;
@@ -37,6 +38,29 @@ const createManyParameters = async (req, res) => {
     const existingParameters = await ParametersModel.find().select('name -_id');
     const existingNames = new Set(existingParameters.map(param => param.name));
   
+    const parseAndValidateRange = (rangeStr) => {
+      const match = rangeStr.match(/min=(\d+)\smax=(\d+)\sunit=([\w/]+)/);
+
+      if (!match) {
+        console.error('Invalid basicRange format', rangeStr);
+        return null;
+      }
+      
+      // Correctly extract values from the regex match
+      // Skip the full match and directly destructure the capturing groups
+      const [, minStr, maxStr, unitStr] = match;
+      const min = Number(minStr);
+      const max = Number(maxStr);
+      const unit = unitStr.trim();
+
+      if (!isValidNumber(min) || !isValidNumber(max) || !isValidUnit(unit)) {
+        console.error('Invalid basicRange values', rangeStr);
+        return null;
+      }
+ 
+      return { min, max, unit };
+    };
+
     // Validate and prepare data
     const validatedData = jsonData.filter(param => {
       // Perform initial filtering to remove existing names
@@ -45,7 +69,22 @@ const createManyParameters = async (req, res) => {
       // Validate and transform each parameter entry according to the schema
       // Note: Here you should include the logic to validate and possibly transform
       // the bioRefRange and any other complex fields according to your needs.
-      
+
+      // Initialize an empty array for the consolidated basicRanges
+      let basicRanges = [];
+
+      // Loop through all keys in the parameter object
+      for (const key in param) {
+        if (key.startsWith('basicRange') && typeof param[key] === 'string') {
+          // Parse and validate the range string
+          const rangeObj = parseAndValidateRange(param[key]);
+          if (rangeObj) {
+            // If valid, add it to the basicRanges array
+            basicRanges.push(rangeObj);
+          }
+        }
+      }
+
       return {
         name: typeof param.name === 'string' ? param.name : null,
         description: typeof param.description === 'string' ? param.description : '',
@@ -53,6 +92,9 @@ const createManyParameters = async (req, res) => {
         units: typeof param.units === 'string' ? param.units : '',
         // Add logic to validate and transform bioRefRange here
         isActive: typeof param.isActive === 'boolean' ? param.isActive : false,
+        remedy: typeof param.remedy === 'string' ? param.remedy : '',
+        bioRefRange: {basicRange: basicRanges},
+
         // Assuming bioRefRange and other complex fields are handled correctly
       };
     }).filter(param => param.name !== null); // Ensure we only proceed with valid entries

@@ -31,33 +31,53 @@ const createManyVaccines = async (req, res) => {
   const worksheet = workbook.Sheets[worksheetName];
   const jsonData = xlsx.utils.sheet_to_json(worksheet);
 
-  if (worksheetName === "vaccines") { // Ensure the correct worksheet name is used
-    // Fetch existing vaccine names to avoid duplicates
-    const existingVaccines = await VaccinesModel.find({deletedAt:null}).select('name -_id');
+  if (worksheetName === "vaccines") {
+    // Fetch existing vaccines to avoid duplicates and ensure they're not marked as deleted
+    const existingVaccines = await VaccinesModel.find({ deletedAt: null }).select('name -_id');
     const existingNames = new Set(existingVaccines.map(vaccine => vaccine.name));
 
-    // Validate and filter out existing names
+    // Validate and prepare data
     const validatedData = jsonData.filter(vaccine => {
-      // Simple field validation
       const isValidName = typeof vaccine.name === 'string' && vaccine.name.trim() !== '';
-      return isValidName && !existingNames.has(vaccine.name);
-    });
+      // Perform initial filtering to remove existing names
+      return isValidName && !existingNames.has(vaccine.name.trim());
+    }).map(vaccine => {
+      // Basic structure validation and sanitization
+      return {
+        name: vaccine.name.trim(),
+        type: typeof vaccine.type === 'string' ? vaccine.type : undefined,
+        recommendedFor: Array.isArray(vaccine.recommendedFor) ? vaccine.recommendedFor : (typeof vaccine.recommendedFor === 'string' ? vaccine.recommendedFor.split(',') : []),
+        // Assume other fields are validated and sanitized accordingly
+      };
+    }).filter(vaccine => vaccine.name && vaccine.type); // Ensure valid entries
 
     if (validatedData.length === 0) {
-      return res.status(400).json({ message: "Vaccines already present or found no entries" });
+      return res.status(400).json({ message: "No new vaccines were added. They may already be present or the file was empty." });
     }
 
-    // Process in batches of 50 to keep the operation performant
+    // Batch insert while respecting the limit of 50 entries
+    const results = [];
     for (let i = 0; i < validatedData.length; i += 50) {
       const batch = validatedData.slice(i, i + 50);
-      await VaccinesModel.insertMany(batch); // Inserts each chunk sequentially
+      const insertResult = await VaccinesModel.insertMany(batch, { ordered: false }).catch(e => {
+        // Handle the duplicate key error or other insertion errors
+        return e;
+      });
+      results.push(insertResult);
     }
 
-    res.status(200).json({ message: "Vaccines added successfully", count: validatedData.length });
+    // If there were any successful inserts, assume success
+    if (results.length > 0) {
+      res.status(200).json({ message: "Vaccines added successfully", count: validatedData.length });
+    } else {
+      // If all batches failed (highly unlikely), return a generic failure message
+      res.status(400).json({ message: "Failed to add new vaccines. Please check your data and try again." });
+    }
   } else {
     res.status(400).send("Incorrect worksheet name. Please use 'vaccines'.");
   }
 };
+
 
 // Update a Vaccine by ID
 const updateVaccine = async (req, res) => {

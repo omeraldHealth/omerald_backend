@@ -77,7 +77,7 @@ const parameters = new mongoose.Schema({
     }
   },
   remedy: {type: String},
-  isActive: { type: Boolean, default: false },
+  isActive: { type: Boolean, default: true },
   deletedAt: { type: Date, default: null },
 });
   
