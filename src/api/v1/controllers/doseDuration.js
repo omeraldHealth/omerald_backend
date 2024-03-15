@@ -70,7 +70,6 @@ const createManyDoseDuration = async (req, res) => {
   }
 };
 
-
 // Update a DoseDuration by ID
 const updateDoseDuration = async (req, res) => {
   const { id,duration } = req.body;
