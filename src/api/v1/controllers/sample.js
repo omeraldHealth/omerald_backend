@@ -15,7 +15,6 @@ const getSample = async (req, res) => {
 // Create a new sample
 const createSample = async (req, res) => {
   const { name ,description,imageUrl, validity} = req.body;
-  console.log(validity)
   try {
     const sample = await SampleModel.create({name,description,imageUrl,validity});
     res.status(201).json(sample);
@@ -94,7 +93,6 @@ const updateSample = async (req, res) => {
 
 const deleteSample = async (req, res) => {
   const { id } = req.params;
-  console.log(id);
   try {
     // Fetch the sample by ID
     const sample = await SampleModel.findById(id);

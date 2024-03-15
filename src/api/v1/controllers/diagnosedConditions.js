@@ -197,7 +197,6 @@ const createManyDiagnosedConditions = async (req, res) => {
 const getDiagnosedConditionsByIds = async (req, res) => {
   try {
       const { ids } = req.body; // Assuming IDs are provided as an array in the request body
-      console.log(req.body);
       const diagnosedConditions = await DiagnoseConditionsModel.find({ 
           _id: { $in: ids }, 
           deletedAt: null 
