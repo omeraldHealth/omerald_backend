@@ -56,19 +56,20 @@ const createManyVaccines = async (req, res) => {
     }
 
     // Batch insert while respecting the limit of 50 entries
-    const results = [];
+    const insertedVaccines = [];
     for (let i = 0; i < validatedData.length; i += 50) {
       const batch = validatedData.slice(i, i + 50);
       const insertResult = await VaccinesModel.insertMany(batch, { ordered: false }).catch(e => {
         // Handle the duplicate key error or other insertion errors
         return e;
       });
-      results.push(insertResult);
+      insertedVaccines.push(...insertResult);
     }
 
     // If there were any successful inserts, assume success
-    if (results.length > 0) {
-      res.status(200).json({ message: "Vaccines added successfully", count: validatedData.length });
+    if (insertedVaccines.length > 0) {
+      const insertedIds = insertedVaccines.map(vaccine => vaccine._id);
+      res.status(200).json({ message: "Vaccines added successfully", count: insertedIds.length, insertedIds });
     } else {
       // If all batches failed (highly unlikely), return a generic failure message
       res.status(400).json({ message: "Failed to add new vaccines. Please check your data and try again." });
@@ -122,10 +123,33 @@ const deleteVaccine = async (req, res) => {
   }
 };
 
+const getVaccinesByIds = async (req, res) => {
+  try {
+      const { ids } = req.body;
+
+      if (!Array.isArray(ids) || ids.length === 0) {
+          return res.status(400).json({ error: 'Invalid input. IDs must be provided as a non-empty array.' });
+      }
+
+      const vaccines = await VaccinesModel.find({ _id: { $in: ids }, deletedAt: null });
+
+      if (!vaccines || vaccines.length === 0) {
+          return res.status(404).json({ message: 'No vaccines found with the provided IDs.' });
+      }
+
+      res.status(200).json(vaccines);
+  } catch (error) {
+      console.error('Error fetching vaccines:', error);
+      res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
 module.exports = {
   getVaccine,
   createVaccine,
   createManyVaccines,
   updateVaccine,
   deleteVaccine,
+  getVaccinesByIds
 };

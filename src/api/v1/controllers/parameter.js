@@ -108,7 +108,9 @@ const createManyParameters = async (req, res) => {
     }
 
     if (results.length > 0) {
-      res.status(200).json({ message: "Parameters inserted successfully", count: validatedData.length });
+      // Extract inserted IDs from results
+      const insertedIds = results.reduce((acc, cur) => [...acc, ...cur.map(doc => doc._id)], []);
+      res.status(200).json({ message: "Parameters inserted successfully", count: insertedIds.length, insertedIds });
     } else {
       res.status(400).json({ message: "No new parameters were added. They may already be present or the file was empty." });
     }
@@ -161,7 +163,6 @@ const deleteparameter = async (req, res) => {
   }
 };
 
-
 const searchParameter = async (req, res) => {
     const { query = '', page = 1 } = req.params;
     const pageSize = 20;
@@ -188,8 +189,22 @@ const searchParameter = async (req, res) => {
     } catch (error) {
       res.status(500).json({ error: 'Internal server error' });
     }
-  };
+};
   
+const getParametersByIds = async (req, res) => {
+    try {
+        const { ids } = req.body; // Assuming IDs are passed in the request body as an array
+
+        if (!Array.isArray(ids)) {
+            return res.status(400).json({ error: 'Invalid input. IDs must be provided as an array.' });
+        }
+
+        const parameters = await ParametersModel.find({ _id: { $in: ids }, deletedAt: null });
+        res.json(parameters);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
 
 module.exports = {
   getParameter,
@@ -198,4 +213,5 @@ module.exports = {
   searchParameter,
   updateParameter,
   deleteparameter,
+  getParametersByIds
 };

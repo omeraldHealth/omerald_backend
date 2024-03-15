@@ -14,5 +14,6 @@ router.post('/addManyDiagnosedCondition',  upload.single('file') , diagnosedCont
 router.put('/updateDiagnosedCondition', diagnosedController.updateDiagnosedConditions);
 router.delete('/deleteDiagnosedCondition/:id', diagnosedController.deleteDiagnosedCondition);
 router.get('/searchDiagnosedCondition/:query', diagnosedController.searchDiagnosedCondition);
+router.post('/getDiagnosedConditionByIds', diagnosedController.getDiagnosedConditionsByIds);
 
 module.exports = router;

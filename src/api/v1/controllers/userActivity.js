@@ -35,9 +35,9 @@ const getActivityById = async (req, res) => {
 
 // Create a new activity
 const createActivity = async (req, res) => {
-  const { userName, action, target, details } = req.body;
+  const { userName, action, details, contentName, content } = req.body;
   try {
-    const activity = await UserActivity.create({ userName, action, target, details });
+    const activity = await UserActivity.create({ userName, action, contentName, content, details });
     res.status(201).json(activity);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' + error });

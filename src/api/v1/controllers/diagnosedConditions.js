@@ -124,7 +124,7 @@ const searchDiagnosedCondition = async (req, res) => {
     }
 };
 
-const createManyDiagnosedConditions = expressAsyncHandler(async (req, res) => {
+const createManyDiagnosedConditions = async (req, res) => {
   if (!req.file) {
     return res.status(400).send('No file uploaded.');
   }
@@ -170,6 +170,8 @@ const createManyDiagnosedConditions = expressAsyncHandler(async (req, res) => {
     }
 
     const results = [];
+    const upsertedIds = [];
+
     for (const chunk of chunkedData) {
       const updates = chunk.map(item => ({
         updateOne: {
@@ -181,13 +183,29 @@ const createManyDiagnosedConditions = expressAsyncHandler(async (req, res) => {
 
       const result = await DiagnoseConditionsModel.bulkWrite(updates);
       results.push(result);
+
+      // Extract upserted IDs and add them to the list
+      upsertedIds.push(...Object.values(result.upsertedIds).map(idObj => idObj._id));
     }
 
-    res.status(200).json(results);
+    res.status(200).json({ message: "Diagnosed conditions inserted successfully", upsertedIds });
   } else {
     res.status(400).send("Incorrect worksheet name. Please use 'diagnosedCondition'.");
   }
-});
+};
+
+const getDiagnosedConditionsByIds = async (req, res) => {
+  try {
+      const { ids } = req.body; // Assuming IDs are provided as an array in the request body
+      const diagnosedConditions = await DiagnoseConditionsModel.find({ 
+          _id: { $in: ids }, 
+          deletedAt: null 
+      });
+      res.json(diagnosedConditions);
+  } catch (error) {
+      res.status(500).json({ error: 'Internal server error' });
+  }
+};
 
 module.exports = {
   getAllDiagnosedConditions,
@@ -196,5 +214,6 @@ module.exports = {
   createManyDiagnosedConditions,
   updateDiagnosedConditions,
   deleteDiagnosedCondition,
-  searchDiagnosedCondition
+  searchDiagnosedCondition,
+  getDiagnosedConditionsByIds
 };

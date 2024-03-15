@@ -50,15 +50,18 @@ const createManyDoseDuration = async (req, res) => {
       }
     }));
 
-    // Insert in batches of 50 to avoid performance issues
+    const insertedDocuments = [];
     const CHUNK_SIZE = 50;
+
     for (let i = 0; i < validatedData.length; i += CHUNK_SIZE) {
       const chunk = validatedData.slice(i, i + CHUNK_SIZE);
-      await DoseDurationsModel.insertMany(chunk);
+      const insertedChunk = await DoseDurationsModel.insertMany(chunk);
+      insertedDocuments.push(...insertedChunk);
     }
 
-    if (validatedData.length > 0) {
-      res.status(200).json({ message: "Dose durations inserted successfully", count: validatedData.length });
+    if (insertedDocuments.length > 0) {
+      const insertedIds = insertedDocuments.map(doc => doc._id);
+      res.status(200).json({ message: "Dose durations inserted successfully", count: insertedIds.length, insertedIds });
     } else {
       res.status(400).json({ message: "No new dose durations were added. They may already be present or the file was empty or errored." });
     }
@@ -66,6 +69,7 @@ const createManyDoseDuration = async (req, res) => {
     res.status(400).send("Incorrect worksheet name. Please use 'doseDurations'.");
   }
 };
+
 
 // Update a DoseDuration by ID
 const updateDoseDuration = async (req, res) => {
@@ -111,6 +115,23 @@ const deleteDoseDuration = async (req, res) => {
   }
 };
 
+const getDoseDurationsByIds = async (req, res) => {
+  try {
+    const { ids } = req.body; // Assuming IDs are passed in the request body as an array
+
+    if (!Array.isArray(ids)) {
+      return res.status(400).json({ error: 'Invalid input. IDs must be provided as an array.' });
+    }
+
+    const doseDurations = await DoseDurationsModel.find({ _id: { $in: ids }, deletedAt: null });
+
+    res.json(doseDurations);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
 
 module.exports = {
   getDoseDuration,
@@ -118,4 +139,5 @@ module.exports = {
   createManyDoseDuration,
   updateDoseDuration,
   deleteDoseDuration,
+  getDoseDurationsByIds
 };

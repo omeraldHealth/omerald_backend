@@ -79,9 +79,6 @@ const createManyDoses = async (req, res) => {
           vaccineDoc = vaccine;
         }
       }
-      // if (typeof dose.type !== 'number') {
-      //   return undefined; // Skip this entry if 'type' is not correctly formatted
-      // }
 
       return {
         name: dose.name,
@@ -95,11 +92,15 @@ const createManyDoses = async (req, res) => {
     // Filter out undefined entries and insert in batches of 50
     const filteredDoses = dosesToInsert.filter(dose => dose !== undefined);
     if (filteredDoses.length > 0) {
+      const insertedDocuments = [];
       for (let i = 0; i < filteredDoses.length; i += 50) {
         const chunk = filteredDoses.slice(i, i + 50);
-        await DoseModel.insertMany(chunk);
+        const insertedChunk = await DoseModel.insertMany(chunk);
+        insertedDocuments.push(...insertedChunk);
       }
-      res.status(200).json({ message: "Doses added successfully", count: filteredDoses.length });
+
+      const insertedIds = insertedDocuments.map(doc => doc._id);
+      res.status(200).json({ message: "Doses added successfully", count: insertedIds.length, insertedIds });
     } else {
       res.status(400).json({ message: "Doses already present or found no new entries to add." });
     }
@@ -107,6 +108,7 @@ const createManyDoses = async (req, res) => {
     res.status(400).send("Incorrect worksheet name. Please use 'doses'.");
   }
 };
+
 
 const updatedosess = async (req, res) => {
     const { id } = req.body;
@@ -162,6 +164,26 @@ const deletedoses = async (req, res) => {
   }
 };
 
+const getDosesByIds = async (req, res) => {
+  try {
+      const { ids } = req.body; // Assuming IDs are passed in the request body as an array
+
+      if (!Array.isArray(ids)) {
+          return res.status(400).json({ error: 'Invalid input. IDs must be provided as an array.' });
+      }
+
+      const doses = await DosesModel.find({ _id: { $in: ids }, deletedAt: null })
+          .populate('duration', 'duration _id')
+          .populate('vaccine', 'name _id')
+          .exec();
+
+      res.json(doses);
+  } catch (error) {
+      res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
 
 module.exports = {
   getAlldosess,
@@ -170,4 +192,5 @@ module.exports = {
   createManyDoses,
   updatedosess,
   deletedoses,
+  getDosesByIds
 };

@@ -12,5 +12,6 @@ router.post('/addSample', samplesController.createSample);
 router.post('/addManySamples',upload.single("file"), samplesController.createManySamples);
 router.put('/updateSample', samplesController.updateSample);
 router.delete('/deleteSample/:id', samplesController.deleteSample);
+router.post('/getAllSamplesById', samplesController.getSamplesByIds);
 
 module.exports = router;

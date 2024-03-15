@@ -12,5 +12,6 @@ router.post('/addVaccine', vaccineController.createVaccine);
 router.post('/addManyVaccine', upload.single("file"), vaccineController.createManyVaccines);
 router.put('/updateVaccine', vaccineController.updateVaccine);
 router.delete('/deleteVaccine/:id', vaccineController.deleteVaccine);
+router.post('/getAllVaccineByIds', vaccineController.getVaccinesByIds);
 
 module.exports = router;

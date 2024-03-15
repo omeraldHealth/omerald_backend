@@ -61,11 +61,14 @@ const createManySamples = async (req, res) => {
 
     if (samplesToInsert.length > 0) {
       // Insert in batches of 50 to respect the limit
+      const insertedSamples = [];
       for (let i = 0; i < samplesToInsert.length; i += 50) {
         const batch = samplesToInsert.slice(i, i + 50);
-        await SamplesModel.insertMany(batch);
+        const insertedBatch = await SamplesModel.insertMany(batch);
+        insertedSamples.push(...insertedBatch);
       }
-      res.status(200).json({ message: "Samples inserted successfully", count: samplesToInsert.length });
+      const insertedIds = insertedSamples.map(sample => sample._id);
+      res.status(200).json({ message: "Samples inserted successfully", count: insertedIds.length, insertedIds });
     } else {
       res.status(400).json({ message: "Samples already present or found no entries" });
     }
@@ -120,11 +123,27 @@ const deleteSample = async (req, res) => {
   }
 };
 
+const getSamplesByIds = async (req, res) => {
+  try {
+      const { ids } = req.body; // Assuming IDs are passed in the request body as an array
+
+      if (!Array.isArray(ids)) {
+          return res.status(400).json({ error: 'Invalid input. IDs must be provided as an array.' });
+      }
+
+      const samples = await SampleModel.find({ _id: { $in: ids }, deletedAt: null });
+      res.json(samples);
+  } catch (error) {
+      res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 
 module.exports = {
   getSample,
   createSample,
   createManySamples,
   updateSample,
-  deleteSample
+  deleteSample,
+  getSamplesByIds
 };

@@ -13,5 +13,6 @@ router.post('/addManyParams',upload.single('file'), parameterController.createMa
 router.put('/updateParam', parameterController.updateParameter);
 router.delete('/deleteParam/:id', parameterController.deleteparameter);
 router.get('/searchParam/:query', parameterController.searchParameter);
+router.post('/getAllParamsById', parameterController.getParametersByIds);
 
 module.exports = router;
