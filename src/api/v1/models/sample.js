@@ -5,6 +5,7 @@ const samples = new mongoose.Schema({
   description: { type: String },
   imageUrl: { type: String },
   deletedAt: { type: Date, default: null },
+  isActive: { type: Boolean, default: true },
   validity: {
     value: {
       type: Number,

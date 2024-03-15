@@ -90,32 +90,35 @@ const updateSample = async (req, res) => {
 
 const deleteSample = async (req, res) => {
   const { id } = req.params;
+  console.log(id);
   try {
-    // Fetch the current user to get the phoneNumber
+    // Fetch the sample by ID
     const sample = await SampleModel.findById(id);
     
+    // If the sample is not found, send an appropriate response
     if (!sample) {
-      throw new Error('sample not found');
+      return res.status(404).json({ message: 'Sample not found' });
     }
 
-    // Append current timestamp to phoneNumber
+    // Append current timestamp to the sample name
     const timestamp = Date.now();
     const updatedName = `${sample.name}*${timestamp}`;
 
-    // Update phoneNumber and set deletedAt
-    await User.updateOne({ _id: id }, {
+    // Update the sample name and set deletedAt
+    await SampleModel.updateOne({ _id: id }, {
       $set: {
         name: updatedName,
         deletedAt: new Date()
       }
     });
 
-    res.json({ message: 'User deleted successfully' });
+    res.json({ message: 'Sample updated successfully' });
   } catch (error) {
+    console.error(error); // Log the error for debugging
     res.status(500).json({ error: 'Internal server error' });
-    // Handle error appropriately
   }
 };
+
 
 module.exports = {
   getSample,
