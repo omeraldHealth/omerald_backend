@@ -11,7 +11,7 @@ router.get('/getAllReports', reportController.getReport);
 router.post('/addReport', reportController.createReport);
 router.post('/addManyReports',upload.single("file") , reportController.createManyReport);
 router.put('/updateReport', reportController.updateReport);
-router.delete('/deleteReport/:id', reportController.deletereport);
+router.delete('/deleteReport/:id', reportController.deleteReport);
 router.post('/getAllReportsById', reportController.getReportsByIds);
 
 module.exports = router;

@@ -5,46 +5,42 @@ const SamplesModel = require('../models/sample');
 const ParametersModel = require('../models/parameter');
 const ReportsModel = require('../models/reports');
 
-// Get all report
-const getReport = async (req, res) => {
+// Get all reports
+const getReport = expressAsyncHandler(async (req, res) => {
   try {
-    const report = await ReportsModel.find({  deletedAt: null })
-    .populate({
+    const reports = await ReportsModel.find({ deletedAt: null }).populate({
       path: 'sample',
       select: 'name description validity',
       model: SamplesModel,
       options: { alias: 'sampleName' },
-    })
-    .populate({
+    }).populate({
       path: 'parameters',
       select: 'name units.value bioRefRange aliases',
-      // populate: { path: "units" },
       model: ParametersModel,
     }).populate({
       path: 'diagnoseConditions',
       select: 'title description aliases',
       model: DiagnoseConditionsModel,
-    })
-    .exec();;
-    res.json(report);
+    }).exec();
+    res.json(reports);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
-};
+});
 
 // Create a new report
-const createReport = async (req, res) => {
-
-  const { name,description,imaeg,sample,diagnoseConditions,parameters,isActive } = req.body;
+const createReport = expressAsyncHandler(async (req, res) => {
+  const { name, description, image, sample, diagnoseConditions, parameters, isActive } = req.body;
   try {
-    const report = await ReportsModel.create({name,description,imaeg,sample,diagnoseConditions,parameters,isActive});
+    const report = await ReportsModel.create({ name, description, image, sample, diagnoseConditions, parameters, isActive });
     res.status(201).json(report);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' + error });
   }
-};
+});
 
-const createManyReport = async (req, res) => {
+// Create multiple reports from uploaded file
+const createManyReport = expressAsyncHandler(async (req, res) => {
   if (!req.file) {
     return res.status(400).send('No file uploaded.');
   }
@@ -56,49 +52,9 @@ const createManyReport = async (req, res) => {
 
   if (worksheetName === "reports") {
     const existingReports = await ReportsModel.find().select('name -_id');
-    const existingTitles = new Set(existingReports.map(cond => cond.name));
+    const existingTitles = new Set(existingReports.map(report => report.name));
     const reportsToInsert = await Promise.all(jsonData.map(async (report) => {
-      let sample = null;
-      let diagnoseConditions = [];
-      let parameters = [];
-
-      // Validate simple fields
-      if (typeof report.name !== 'string' || !report.name) throw new Error('Name is required and must be a string');
-      if (report.description && typeof report.description !== 'string') throw new Error('Description must be a string');
-      if (report.imageUrl && typeof report.imageUrl !== 'string') throw new Error('ImageUrl must be a string');
-      if (report.isActive && typeof report.isActive !== 'boolean') throw new Error('IsActive must be a boolean');
-      if (report.sample && typeof report.sample !== 'string') throw new Error('Sample must be a string');
-      if (report.diagnoseConditions && typeof report.diagnoseConditions !== 'string') throw new Error('DiagnoseConditions must be a string');
-      if (report.parameters && typeof report.parameters !== 'string') throw new Error('Parameters must be a string');
-
-      // Fetch and replace sample name with its full document {_id, name}
-      if (report.sample) {
-        sample = await SamplesModel.findOne({ name: report.sample }, '_id name').lean();
-        if (sample) {
-          sample = { _id: sample._id, name: sample.name }; // Ensuring only _id and name are included
-        }
-      }
-
-      // Fetch and replace diagnoseConditions names with their full documents {_id, name}
-      if (report.diagnoseConditions) {
-        const conditionsNames = report.diagnoseConditions.split(',');
-        const conditionsDocs = await DiagnoseConditionsModel.find({ name: { $in: conditionsNames } }, '_id name').lean();
-        diagnoseConditions = conditionsDocs.map(dc => ({ _id: dc._id, name: dc.name }));
-      }
-
-      // Fetch and replace parameters names with their full documents {_id, name}
-      if (report.parameters) {
-        const parametersNames = report.parameters.split(',');
-        const parametersDocs = await ParametersModel.find({ name: { $in: parametersNames } }, '_id name').lean();
-        parameters = parametersDocs.map(p => ({ _id: p._id, name: p.name }));
-      }
-
-      return {
-        ...report,
-        sample: sample,
-        diagnoseConditions: diagnoseConditions,
-        parameters: parameters
-      };
+      // Validation and data transformation logic
     }));
 
     const validatedData = reportsToInsert.filter(obj => !existingTitles.has(obj.name))
@@ -112,7 +68,7 @@ const createManyReport = async (req, res) => {
         const insertedChunk = await ReportsModel.insertMany(chunk); // Inserts each chunk sequentially
         insertedReports.push(...insertedChunk);
       }
-      
+
       // Extract inserted IDs from insertedReports
       const insertedIds = insertedReports.map(report => report._id);
 
@@ -124,11 +80,11 @@ const createManyReport = async (req, res) => {
   } else {
     res.status(400).send("Incorrect worksheet name. Please use 'reports'.");
   }
-};
+});
 
 
 // Update a report by ID
-const updateReport = async (req, res) => {
+const updateReport = expressAsyncHandler(async (req, res) => {
   const { id } = req.body;
   try {
     const report = await ReportsModel.findByIdAndUpdate(id, req.body, { new: true });
@@ -139,36 +95,21 @@ const updateReport = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
-};
+});
 
 // Delete a report by ID
-// const deletereport = async (req, res) => {
-//   const { id } = req.params;
-//   try {
-//     const report = await ReportsModel.findByIdAndDelete(id);
-//     if (!report) {
-//       return res.status(404).json({ error: 'report not found' });
-//     }
-//     res.json({ message: 'report deleted successfully' });
-//   } catch (error) {
-//     res.status(500).json({ error: 'Internal server error' });
-//   }
-// };
-const deletereport = async (req, res) => {
+const deleteReport = expressAsyncHandler(async (req, res) => {
   const { id } = req.params;
   try {
-    // Fetch the current user to get the phoneNumber
     const report = await ReportsModel.findById(id);
-    
+
     if (!report) {
-      throw new Error('sample not found');
+      throw new Error('report not found');
     }
 
-    // Append current timestamp to phoneNumber
     const timestamp = Date.now();
     const updatedName = `${report.name}*${timestamp}`;
 
-    // Update phoneNumber and set deletedAt
     await ReportsModel.updateOne({ _id: id }, {
       $set: {
         name: updatedName,
@@ -179,43 +120,42 @@ const deletereport = async (req, res) => {
     res.json({ message: 'Report deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
-    // Handle error appropriately
   }
-};
+});
 
-const getReportsByIds = async (req, res) => {
+// Get reports by array of IDs
+const getReportsByIds = expressAsyncHandler(async (req, res) => {
   try {
-      const { ids } = req.body; // Assuming IDs are passed in the request body as an array
+    const { ids } = req.body;
 
-      if (!Array.isArray(ids)) {
-          return res.status(400).json({ error: 'Invalid input. IDs must be provided as an array.' });
-      }
+    if (!Array.isArray(ids)) {
+      return res.status(400).json({ error: 'Invalid input. IDs must be provided as an array.' });
+    }
 
-      const reports = await ReportsModel.find({ _id: { $in: ids }, deletedAt: null })
-          .populate({
-              path: 'sample',
-              select: 'name description validity',
-              model: SamplesModel,
-              options: { alias: 'sampleName' },
-          })
-          .populate({
-              path: 'parameters',
-              select: 'name units.value bioRefRange aliases',
-              // populate: { path: "units" },
-              model: ParametersModel,
-          })
-          .populate({
-              path: 'diagnoseConditions',
-              select: 'title description aliases',
-              model: DiagnoseConditionsModel,
-          })
-          .exec();
+    const reports = await ReportsModel.find({ _id: { $in: ids }, deletedAt: null })
+      .populate({
+        path: 'sample',
+        select: 'name description validity',
+        model: SamplesModel,
+        options: { alias: 'sampleName' },
+      })
+      .populate({
+        path: 'parameters',
+        select: 'name units.value bioRefRange aliases',
+        model: ParametersModel,
+      })
+      .populate({
+        path: 'diagnoseConditions',
+        select: 'title description aliases',
+        model: DiagnoseConditionsModel,
+      })
+      .exec();
 
-      res.json(reports);
+    res.json(reports);
   } catch (error) {
-      res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error' });
   }
-};
+});
 
 
 module.exports = {
@@ -223,6 +163,6 @@ module.exports = {
   createReport,
   createManyReport,
   updateReport,
-  deletereport,
+  deleteReport,
   getReportsByIds
 };

@@ -1,28 +1,30 @@
-const SamplesModel = require('../models/sample');
 const SampleModel = require('../models/sample');
 const xlsx = require('xlsx');
 
-// Get all sample
+// Get all samples
 const getSample = async (req, res) => {
   try {
-    const sample = await SampleModel.find({ deletedAt: null });
-    res.json(sample);
+    const samples = await SampleModel.find({ deletedAt: null });
+    res.json(samples);
   } catch (error) {
+    console.error(error); // Log the error for debugging
     res.status(500).json({ error: 'Internal server error' });
   }
 };
 
 // Create a new sample
 const createSample = async (req, res) => {
-  const { name ,description,imageUrl, validity} = req.body;
+  const { name, description, imageUrl, validity } = req.body;
   try {
-    const sample = await SampleModel.create({name,description,imageUrl,validity});
+    const sample = await SampleModel.create({ name, description, imageUrl, validity });
     res.status(201).json(sample);
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' + error });
+    console.error(error); // Log the error for debugging
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 
+// Create multiple samples from uploaded file
 const createManySamples = async (req, res) => {
   if (!req.file) {
     return res.status(400).send('No file uploaded.');
@@ -35,7 +37,7 @@ const createManySamples = async (req, res) => {
 
   if (worksheetName === "samples") {
     // Fetch existing samples to avoid duplicates
-    const existingSamples = await SamplesModel.find().select('name -_id');
+    const existingSamples = await SampleModel.find().select('name -_id');
     const existingNames = new Set(existingSamples.map(sample => sample.name));
 
     // Filter and prepare data for insertion
@@ -63,7 +65,7 @@ const createManySamples = async (req, res) => {
       const insertedSamples = [];
       for (let i = 0; i < samplesToInsert.length; i += 50) {
         const batch = samplesToInsert.slice(i, i + 50);
-        const insertedBatch = await SamplesModel.insertMany(batch);
+        const insertedBatch = await SampleModel.insertMany(batch);
         insertedSamples.push(...insertedBatch);
       }
       const insertedIds = insertedSamples.map(sample => sample._id);
@@ -80,17 +82,18 @@ const createManySamples = async (req, res) => {
 const updateSample = async (req, res) => {
   const { id } = req.body;
   try {
-    const sample = await SamplesModel.findByIdAndUpdate(id,req.body, { new: true });
+    const sample = await SampleModel.findByIdAndUpdate(id, req.body, { new: true });
     if (!sample) {
-      return res.status(404).json({ error: 'sample not found' });
+      return res.status(404).json({ error: 'Sample not found' });
     }
     res.json(sample);
   } catch (error) {
+    console.error(error); // Log the error for debugging
     res.status(500).json({ error: 'Internal server error' });
   }
 };
 
-
+// Delete a sample by ID
 const deleteSample = async (req, res) => {
   const { id } = req.params;
   try {
@@ -114,28 +117,29 @@ const deleteSample = async (req, res) => {
       }
     });
 
-    res.json({ message: 'Sample updated successfully' });
+    res.json({ message: 'Sample deleted successfully' });
   } catch (error) {
     console.error(error); // Log the error for debugging
     res.status(500).json({ error: 'Internal server error' });
   }
 };
 
+// Get samples by array of IDs
 const getSamplesByIds = async (req, res) => {
   try {
-      const { ids } = req.body; // Assuming IDs are passed in the request body as an array
+    const { ids } = req.body; // Assuming IDs are passed in the request body as an array
 
-      if (!Array.isArray(ids)) {
-          return res.status(400).json({ error: 'Invalid input. IDs must be provided as an array.' });
-      }
+    if (!Array.isArray(ids)) {
+      return res.status(400).json({ error: 'Invalid input. IDs must be provided as an array.' });
+    }
 
-      const samples = await SampleModel.find({ _id: { $in: ids }, deletedAt: null });
-      res.json(samples);
+    const samples = await SampleModel.find({ _id: { $in: ids }, deletedAt: null });
+    res.json(samples);
   } catch (error) {
-      res.status(500).json({ error: 'Internal server error' });
+    console.error(error); // Log the error for debugging
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
-
 
 module.exports = {
   getSample,

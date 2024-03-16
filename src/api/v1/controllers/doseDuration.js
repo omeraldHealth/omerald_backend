@@ -1,12 +1,11 @@
 const DoseDurationsModel = require('../models/doseDuration');
-const DoseDuration = require('../models/doseDuration');
 const xlsx = require('xlsx');
 
-// Get all DoseDuration
+// Get all DoseDurations
 const getDoseDuration = async (req, res) => {
   try {
-    const doseDuration = await DoseDuration.find({deletedAt: null});
-    res.json(doseDuration);
+    const doseDurations = await DoseDurationsModel.find({ deletedAt: null });
+    res.json(doseDurations);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
@@ -16,13 +15,14 @@ const getDoseDuration = async (req, res) => {
 const createDoseDuration = async (req, res) => {
   const { duration } = req.body;
   try {
-    const doseDuration = await DoseDuration.create({duration});
+    const doseDuration = await DoseDurationsModel.create({ duration });
     res.status(201).json(doseDuration);
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' + error });
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 
+// Create multiple DoseDurations from an Excel file
 const createManyDoseDuration = async (req, res) => {
   if (!req.file) {
     return res.status(400).send('No file uploaded.');
@@ -33,37 +33,24 @@ const createManyDoseDuration = async (req, res) => {
   const worksheet = workbook.Sheets[worksheetName];
   const jsonData = xlsx.utils.sheet_to_json(worksheet);
 
-  if (worksheetName === "doseDurations") {
-    const existingDurations = await DoseDurationsModel.find();
-    // Assuming `duration` is unique by combining `type` and `value`
-    const existingCombos = new Set(existingDurations.map(item => `${item.duration.type}-${item.duration.value}`));
+  if (worksheetName === 'doseDurations') {
+    try {
+      const existingDurations = await DoseDurationsModel.find({}, { duration: 1 });
+      const existingDurationSet = new Set(existingDurations.map(d => `${d.duration.type}-${d.duration.value}`));
 
-    const validatedData = jsonData.filter(item => {
-      // Validate fields
-      const isValidType = typeof item.type === 'string' && item.type.trim() !== '';
-      const combo = `${item.type}-${item.value}`;
-      return isValidType && !existingCombos.has(combo);
-    }).map(item => ({
-      duration: {
-        type: item.type,
-        value: item.value
+      const newData = jsonData
+        .filter(item => item.type && item.value)
+        .filter(item => !existingDurationSet.has(`${item.type}-${item.value}`))
+        .map(item => ({ duration: { type: item.type, value: item.value } }));
+
+      if (newData.length === 0) {
+        return res.status(400).json({ message: 'No new data to insert' });
       }
-    }));
 
-    const insertedDocuments = [];
-    const CHUNK_SIZE = 50;
-
-    for (let i = 0; i < validatedData.length; i += CHUNK_SIZE) {
-      const chunk = validatedData.slice(i, i + CHUNK_SIZE);
-      const insertedChunk = await DoseDurationsModel.insertMany(chunk);
-      insertedDocuments.push(...insertedChunk);
-    }
-
-    if (insertedDocuments.length > 0) {
-      const insertedIds = insertedDocuments.map(doc => doc._id);
-      res.status(200).json({ message: "Dose durations inserted successfully", count: insertedIds.length, insertedIds });
-    } else {
-      res.status(400).json({ message: "No new dose durations were added. They may already be present or the file was empty or errored." });
+      const insertedData = await DoseDurationsModel.insertMany(newData);
+      res.status(201).json({ message: 'Dose durations inserted successfully', insertedData });
+    } catch (error) {
+      res.status(500).json({ error: 'Internal server error' });
     }
   } else {
     res.status(400).send("Incorrect worksheet name. Please use 'doseDurations'.");
@@ -72,65 +59,46 @@ const createManyDoseDuration = async (req, res) => {
 
 // Update a DoseDuration by ID
 const updateDoseDuration = async (req, res) => {
-  const { id,duration } = req.body;
+  const { id } = req.params;
+  const { duration } = req.body;
   try {
-    const doseDuration = await DoseDuration.findByIdAndUpdate(id, { duration }, { new: true });
-    if (!doseDuration) {
+    const updatedDoseDuration = await DoseDurationsModel.findByIdAndUpdate(id, { duration }, { new: true });
+    if (!updatedDoseDuration) {
       return res.status(404).json({ error: 'DoseDuration not found' });
     }
-    res.json(doseDuration);
+    res.json(updatedDoseDuration);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
 
 // Delete a DoseDuration by ID
-// const deleteDoseDuration = async (req, res) => {
-//   const { id } = req.params;
-//   try {
-//     const doseDuration = await DoseDuration.findByIdAndDelete(id);
-//     if (!doseDuration) {
-//       return res.status(404).json({ error: 'DoseDuration not found' });
-//     }
-//     res.json({ message: 'DoseDuration deleted successfully' });
-//   } catch (error) {
-//     res.status(500).json({ error: 'Internal server error' });
-//   }
-// };
-
 const deleteDoseDuration = async (req, res) => {
   const { id } = req.params;
   try {
-    // Fetch the current user to get the phoneNumber
-    const doseDuration = await DoseDuration.findByIdAndUpdate(id ,  {deletedAt: Date.now()});
-    if (!doseDuration) {
+    const deletedDoseDuration = await DoseDurationsModel.findByIdAndUpdate(id, { deletedAt: Date.now() });
+    if (!deletedDoseDuration) {
       return res.status(404).json({ error: 'DoseDuration not found' });
     }
-
     res.json({ message: 'DoseDuration deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
-    // Handle error appropriately
   }
 };
 
+// Get DoseDurations by IDs
 const getDoseDurationsByIds = async (req, res) => {
+  const { ids } = req.body;
   try {
-    const { ids } = req.body; // Assuming IDs are passed in the request body as an array
-
-    if (!Array.isArray(ids)) {
-      return res.status(400).json({ error: 'Invalid input. IDs must be provided as an array.' });
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: 'Invalid input. IDs must be provided as a non-empty array.' });
     }
-
     const doseDurations = await DoseDurationsModel.find({ _id: { $in: ids }, deletedAt: null });
-
     res.json(doseDurations);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-
-
 
 module.exports = {
   getDoseDuration,

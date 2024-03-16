@@ -3,10 +3,10 @@ const Category = require('../models/categoryParams');
 // Get all categories
 exports.getAllCategories = async (req, res) => {
   try {
-    const categories = await Category.find({ deletedAt: null });
+    const categories = await Category.find({ deletedAt: null }).lean(); // Use lean() for better performance
     res.status(200).json(categories);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ error: true, message: 'Failed to fetch categories' });
   }
 };
 
@@ -19,7 +19,7 @@ exports.createCategory = async (req, res) => {
     await category.save();
     res.status(201).json(category);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ error: true, message: 'Failed to create category', details: error.message });
   }
 };
 
@@ -29,18 +29,13 @@ exports.updateCategory = async (req, res) => {
   const { categoryName, categoryOptions } = req.body;
 
   try {
-    const category = await Category.findById(id);
+    const category = await Category.findByIdAndUpdate(id, { categoryName, categoryOptions }, { new: true });
     if (!category) {
-      return res.status(404).json({ message: 'Category not found' });
+      return res.status(404).json({ error: true, message: 'Category not found' });
     }
-
-    category.categoryName = categoryName;
-    category.categoryOptions = categoryOptions;
-
-    await category.save();
     res.status(200).json(category);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ error: true, message: 'Failed to update category', details: error.message });
   }
 };
 
@@ -49,15 +44,12 @@ exports.deleteCategory = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const category = await Category.findById(id);
+    const category = await Category.findByIdAndUpdate(id, { deletedAt: new Date() });
     if (!category) {
-      return res.status(404).json({ message: 'Category not found' });
+      return res.status(404).json({ error: true, message: 'Category not found' });
     }
-
-    category.deletedAt = new Date();
-    await category.save();
     res.status(200).json({ message: 'Category deleted successfully' });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ error: true, message: 'Failed to delete category', details: error.message });
   }
 };

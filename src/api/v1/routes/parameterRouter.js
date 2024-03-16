@@ -11,7 +11,7 @@ router.get('/getAllParams', parameterController.getParameter);
 router.post('/addParam', parameterController.createParameter);
 router.post('/addManyParams',upload.single('file'), parameterController.createManyParameters);
 router.put('/updateParam', parameterController.updateParameter);
-router.delete('/deleteParam/:id', parameterController.deleteparameter);
+router.delete('/deleteParam/:id', parameterController.deleteParameter);
 router.get('/searchParam/:query', parameterController.searchParameter);
 router.post('/getAllParamsById', parameterController.getParametersByIds);
 
