@@ -29,5 +29,5 @@ module.exports = {
   diagSettingRouter,
   healthRouter,
   activityRouter,
-  categoryRouter
+  categoryRouter,
 };
