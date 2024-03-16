@@ -12,7 +12,6 @@ const routeConfig = [
     { path: '/doseDuration', route: routeImports.doseDurationRoutes },
     { path: '/doses', route: routeImports.dosesRoutes },
     { path: '/vaccine', route: routeImports.vaccineRoutes },
-    { path: '/ignoredParams', route: routeImports.ignoredParamRouter },
     { path: '/parameter', route: routeImports.parameterRouter },
     { path: '/reports', route: routeImports.reportRouter },
     { path: '/samples', route: routeImports.sampleRouter },

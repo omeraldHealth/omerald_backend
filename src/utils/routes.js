@@ -3,7 +3,6 @@ const diagnosedConditionRoutes = require("../api/v1/routes/diagnosedCondition");
 const doseDurationRoutes = require("../api/v1/routes/doseDurationRouter");
 const dosesRoutes = require("../api/v1/routes/dosesRouter");
 const vaccineRoutes = require("../api/v1/routes/vaccineRouter");
-const ignoredParamRouter = require("../api/v1/routes/ignoredParamRouter");
 const parameterRouter =  require("../api/v1/routes/parameterRouter");
 const reportRouter = require("../api/v1/routes/reportRouter");
 const sampleRouter = require("../api/v1/routes/sampleRoutes");
@@ -19,7 +18,6 @@ module.exports = {
   doseDurationRoutes,
   dosesRoutes,
   vaccineRoutes,
-  ignoredParamRouter,
   parameterRouter,
   reportRouter,
   sampleRouter,

@@ -1,33 +1,51 @@
-const mongoose = require("mongoose")
+const mongoose = require('mongoose');
 
-var reports = new mongoose.Schema({
-  name: { type: String, required: true },
-  description: { type: String },
-  imageUrl: { type: String },
-  sample: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'samples',
-    },
-  ],
-  diagnoseConditions: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'diagnoseConditions',
-    },
-  ],
-  parameters: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'parameters',
-    },
-  ],
-  isActive: { type: Boolean, default: false },
-  deletedAt: { type: Date, default: null },
+const reportSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: [true, 'Report name is required.'],
+    trim: true,
+  },
+  description: {
+    type: String,
+    trim: true,
+    default: '',
+  },
+  imageUrl: {
+    type: String,
+    trim: true,
+    default: '',
+  },
+  sample: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Sample',
+    required: [true, 'Sample reference is required.'],
+  }],
+  diagnoseConditions: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'DiagnoseCondition',
+    required: [true, 'Diagnose Condition reference is required.'],
+  }],
+  parameters: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Parameter',
+    required: [true, 'Parameter reference is required.'],
+  }],
+  isActive: {
+    type: Boolean,
+    default: true,
+  },
+  deletedAt: {
+    type: Date,
+    default: null,
+  },
+}, {
+  timestamps: true,
 });
-  
-mongoose.models = {};
 
-var ReportsModel = mongoose.model('reports', reports);
+// Index for improving query performance on frequently accessed fields
+reportSchema.index({ isActive: 1, name: 1 });
 
-module.exports = ReportsModel
+const ReportsModel = mongoose.model('Report', reportSchema);
+
+module.exports = ReportsModel;

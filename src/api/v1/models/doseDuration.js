@@ -1,19 +1,26 @@
 const mongoose = require('mongoose');
 
-const doseDurations = new mongoose.Schema({
-  duration: { 
-    type: {type: String, required: true},
-    value: {type: String, required: true}
-   },
-   deletedAt: { type: Date, default: null },
-  });
-  
-  doseDurations.pre(/^find/, function(next) {
-    this.where({ deletedAt: null });
-    next();
-  });
+const doseDurationSchema = new mongoose.Schema({
+  duration: {
+    type: {
+      type: String, 
+      required: [true, 'Duration type is required'], // Enhanced readability with validation message
+      enum: ['days', 'weeks', 'months', 'years'], // Assuming these are your intended types
+      trim: true
+    },
+    value: {
+      type: String, 
+      required: [true, 'Duration value is required'],
+      trim: true
+    }
+  },
+  deletedAt: {
+    type: Date,
+    default: null
+  }
+}, {
+  timestamps: true // Automatically adds createdAt and updatedAt fields
+});
 
-mongoose.models = {};
-
-const DoseDurationsModel = mongoose.model('doseDurations', doseDurations);
-module.exports = DoseDurationsModel;
+const DoseDurationModel = mongoose.model('DoseDuration', doseDurationSchema);
+module.exports = DoseDurationModel;

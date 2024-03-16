@@ -1,89 +1,99 @@
 const mongoose = require('mongoose');
 
+const bioRefSubCategorySchema = new mongoose.Schema({
+  categoryName: String,
+  categoryOptions: [{
+    categoryType: String,
+    min: Number,
+    max: Number,
+    unit: String,
+  }],
+}, { _id: false });
 
-const parameters = new mongoose.Schema({
-  name: { type: String, required: true },
-  description: { type: String },
-  aliases: { type: [String] },
-  units: {type: String},
+const bioRefCustomCategorySchema = new mongoose.Schema({
+  categoryName: String,
+  subCategory: bioRefSubCategorySchema,
+  categoryOptions: [{
+    categoryType: String,
+    min: Number,
+    max: Number,
+    unit: String,
+  }],
+}, { _id: false });
+
+const genderRangeDetailsSchema = new mongoose.Schema({
+  menopause: { type: Boolean, default: false },
+  pregnant: { type: Boolean, default: false },
+  trimester: {
+    type: String,
+    enum: ['first', 'second', 'third', 'none'],
+    default: 'none',
+  },
+  prePuberty: { type: Boolean, default: false },
+}, { _id: false });
+
+const parametersSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  description: {
+    type: String,
+    trim: true,
+  },
+  aliases: [String],
+  units: String,
   bioRefRange: {
     basicRange: [{
-      min: {type:Number},
-      max:{type:Number},
-      unit:{type:String},
+      min: Number,
+      max: Number,
+      unit: String,
     }],
     advanceRange: {
-        ageRange: [
-          {
-            ageRangeType: { 
-              type: String, 
-              enum: ['pediatric', 'senior', 'adult'], // Ensures only these values are allowed
-              required: true 
-            },
-            unit: {type:String},
-            min: {type:Number},
-            max:{type:Number},
-          }
-        ],
-        genderRange:  [
-          {
-            generRangeType: { 
-              type: String, 
-              enum: ['male', 'female', 'other'], // Ensures only these values are allowed
-              required: true 
-            },
-            unit: {type:String},
-            min: {type:Number},
-            max:{type:Number},
-            details: {
-              menopause: { 
-                type: Boolean, 
-                default: false,
-              },
-              pregnant: { 
-                type: Boolean, 
-                default: false
-              },
-              trimester: {
-                type: {
-                  type: String,
-                  enum: ['first', 'second', 'third', 'none'],
-                  default: 'none',
-                },
-              },
-              prePuberty: { 
-                type: Boolean, 
-                default: false,
-              }
-            }
-          }
-        ],
-        customCategory: [{
-          categoryName: { type: String },
-          subCategory: {categoryName: String,
-            categoryOptions: [{
-              categoryType: { type: String },
-              min: { type: Number },
-              max: { type: Number },
-              unit: { type: String }
-          }]}, // Recursive relationship
-          categoryOptions: [{
-            categoryType: { type: String },
-            min: { type: Number },
-            max: { type: Number },
-            unit: { type: String }
-          }]
-        }]
+      ageRange: [{
+        ageRangeType: { 
+          type: String, 
+          enum: ['pediatric', 'senior', 'adult'],
+          required: true,
+        },
+        unit: String,
+        min: Number,
+        max: Number,
+      }],
+      genderRange: [{
+        genderRangeType: { 
+          type: String, 
+          enum: ['male', 'female', 'other'],
+          required: true,
+        },
+        unit: String,
+        min: Number,
+        max: Number,
+        details: genderRangeDetailsSchema,
+      }],
+      customCategory: [bioRefCustomCategorySchema],
     }
   },
-  remedy: {type: String},
-  isActive: { type: Boolean, default: true },
-  deletedAt: { type: Date, default: null },
+  remedy: String,
+  isActive: {
+    type: Boolean,
+    default: true,
+  },
+  deletedAt: {
+    type: Date,
+    default: null,
+  },
+}, {
+  timestamps: true, // Automatically adds createdAt and updatedAt timestamps
 });
-  
 
-mongoose.models = {};
+// Exclude logically deleted documents by default in find queries
+parametersSchema.pre(/^find/, function(next) {
+  this.where({ deletedAt: null });
+  next();
+});
 
-const ParametersModel = mongoose.model('parameters', parameters);
+const ParametersModel = mongoose.model('Parameter', parametersSchema);
 
 module.exports = ParametersModel;

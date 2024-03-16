@@ -1,17 +1,36 @@
 const mongoose = require("mongoose");
 
 const diagnosticSettingsSchema = new mongoose.Schema({
-  settings: {
-    FAQs: { type: String, description: "Frequently Asked Questions section", default: "No Data" },
-    PrivacyPolicy: { type: String, description: "Privacy Policy section", default: "No Data" },
-    TermsOfService: { type: String, description: "Terms of Service section", default: "No Data" },
-    PlatformConsent: { type: String, description: "Platform Consent section", default: "No Data" },
-    Disclaimer: { type: String, description: "Disclaimer section", default: "No Data" },
-    CustomerSupport: { type: String, description: "Customer Support section", default: "No Data" },
+  FAQs: {
+    type: String,
+    default: "No Data"
+  },
+  PrivacyPolicy: {
+    type: String,
+    default: "No Data"
+  },
+  TermsOfService: {
+    type: String,
+    default: "No Data"
+  },
+  PlatformConsent: {
+    type: String,
+    default: "No Data"
+  },
+  Disclaimer: {
+    type: String,
+    default: "No Data"
+  },
+  CustomerSupport: {
+    type: String,
+    default: "No Data"
   }
-}, { minimize: false });
-
-mongoose.models = {};
+}, {
+  timestamps: true, // Add created and updated timestamps
+  minimize: false, // Ensure empty objects are stored
+  toObject: { virtuals: true }, // Ensure virtuals are included when converting the document to an object
+  toJSON: { virtuals: true } // Ensure virtuals are included when converting the document to JSON
+});
 
 const DiagnosticSettingsModel = mongoose.model('DiagnosticSettings', diagnosticSettingsSchema);
 

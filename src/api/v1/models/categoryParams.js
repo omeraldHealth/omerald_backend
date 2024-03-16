@@ -3,34 +3,34 @@ const mongoose = require('mongoose');
 const categorySchema = new mongoose.Schema({
   categoryName: {
     type: String,
-    required: true
+    required: [true, 'Category name is required'], // Adding a validation message
+    trim: true, // Trims whitespace around the category name
+    unique: true, // Ensures categoryName is unique across all documents
   },
   categoryOptions: {
     type: [String],
-    default: []
+    default: [],
   },
   createdTime: {
     type: Date,
     default: Date.now,
-    immutable: true // Created time should not be modified
+    immutable: true, // Ensures createdTime cannot be modified
   },
   lastUpdatedTime: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
+}, {
+  timestamps: { createdAt: 'createdTime', updatedAt: 'lastUpdatedTime' }, // Use Mongoose's timestamps option
 });
 
-categorySchema.index({ categoryName: 1 }, { unique: true }); // Index for faster lookup by category name
+// Ensure the `unique` property on `categoryName` is enforced.
+// Note: Mongoose's `unique` isn't a validator but tells Mongoose to create a unique index.
+categorySchema.index({ categoryName: 1 }, { unique: true });
 
-// Pre-save hook to update last updated time
-categorySchema.pre('save', function(next) {
-  this.lastUpdatedTime = new Date();
-  next();
-});
-
-// Pre-update hook to update last updated time
-categorySchema.pre('findOneAndUpdate', function(next) {
-  this.lastUpdatedTime = new Date();
+// Pre-update middleware for `updateOne` and `findOneAndUpdate` operations
+categorySchema.pre(['updateOne', 'findOneAndUpdate'], function(next) {
+  this.set({ lastUpdatedTime: new Date() }); // Correctly update lastUpdatedTime
   next();
 });
 
