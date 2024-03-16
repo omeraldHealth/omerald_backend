@@ -3,9 +3,9 @@ const mongoose = require('mongoose');
 const vaccineSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, 'Vaccine name is required'], // Adds a custom validation message
-    unique: [true, 'Vaccine name must be unique'], // Ensures vaccine names are unique with a custom message
-    trim: true, // Trims whitespace from the vaccine name
+    required: [true, 'Vaccine name is required'],
+    unique: true, // Ensure uniqueness constraint directly specified
+    trim: true,
   },
   deletedAt: {
     type: Date,
@@ -15,8 +15,18 @@ const vaccineSchema = new mongoose.Schema({
   timestamps: true, // Automatically add createdAt and updatedAt fields
 });
 
-// If you want to ensure the uniqueness constraint is applied correctly, consider handling errors for unique index violations in your application logic
+// Index for improving query performance on frequently accessed fields
+vaccineSchema.index({ name: 1 });
 
-const VaccinesModel = mongoose.model('Vaccine', vaccineSchema); // Singular name for the model as per best practices
+// Error handling middleware
+vaccineSchema.post('save', function(error, doc, next) {
+  if (error.name === 'MongoError' && error.code === 11000) {
+    next(new Error('Vaccine name must be unique'));
+  } else {
+    next(error);
+  }
+});
 
-module.exports = VaccinesModel;
+const VaccineModel = mongoose.model('Vaccine', vaccineSchema); // Singular name for the model as per best practices
+
+module.exports = VaccineModel;

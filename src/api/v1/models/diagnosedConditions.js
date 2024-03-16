@@ -1,5 +1,14 @@
 const mongoose = require('mongoose');
 
+// Define a custom validator for URL validation
+const urlValidator = {
+  validator: (value) => {
+    const urlRegex = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
+    return urlRegex.test(value);
+  },
+  message: 'Please provide a valid URL.',
+};
+
 const healthTopicLinkSchema = new mongoose.Schema({
   id: {
     type: Number,
@@ -14,7 +23,7 @@ const healthTopicLinkSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Health topic link URL is required.'],
     trim: true,
-    match: [/^https?:\/\/.+/i, 'Please provide a valid URL.'], // Simple regex for URL validation
+    validate: urlValidator, // Using custom validator for URL validation
   },
   label: {
     type: String,
@@ -41,7 +50,7 @@ const diagnoseConditionsSchema = new mongoose.Schema({
     type: String,
     trim: true,
     default: '',
-    match: [/^https?:\/\/.+/i, 'Please provide a valid image URL.'], // Simple regex for URL validation
+    validate: urlValidator, // Using custom validator for URL validation
   },
   aliases: [{
     type: String,
@@ -54,11 +63,9 @@ const diagnoseConditionsSchema = new mongoose.Schema({
   healthTopicLinks: {
     type: [healthTopicLinkSchema],
     validate: {
-      validator: function(v) {
-        return v.length > 0; // Ensure there's at least one health topic link
-      },
-      message: 'At least one health topic link is required.'
-    }
+      validator: (value) => value.length > 0,
+      message: 'At least one health topic link is required.',
+    },
   },
   deletedAt: {
     type: Date,
@@ -68,6 +75,5 @@ const diagnoseConditionsSchema = new mongoose.Schema({
   timestamps: true, // Automatically adds createdAt and updatedAt
 });
 
-const DiagnoseConditionsModel = mongoose.model('DiagnoseConditions', diagnoseConditionsSchema);
-
-module.exports = DiagnoseConditionsModel;
+// Export the model directly from the schema definition
+module.exports = mongoose.model('DiagnoseConditions', diagnoseConditionsSchema);

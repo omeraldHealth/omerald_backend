@@ -23,7 +23,7 @@ const reportSchema = new mongoose.Schema({
   }],
   diagnoseConditions: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'DiagnoseCondition',
+    ref: 'DiagnoseConditions', // Consistent naming with the referenced model
     required: [true, 'Diagnose Condition reference is required.'],
   }],
   parameters: [{
@@ -46,6 +46,5 @@ const reportSchema = new mongoose.Schema({
 // Index for improving query performance on frequently accessed fields
 reportSchema.index({ isActive: 1, name: 1 });
 
-const ReportsModel = mongoose.model('Report', reportSchema);
-
-module.exports = ReportsModel;
+// Export the model directly from the schema definition
+module.exports = mongoose.model('Report', reportSchema);

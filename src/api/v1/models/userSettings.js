@@ -6,37 +6,55 @@ const userSettingsSchema = new mongoose.Schema({
       type: String,
       default: "No Data",
       trim: true,
-      validate: [value => value.length > 0, 'FAQs cannot be empty']
+      validate: {
+        validator: (value) => value.length > 0,
+        message: 'FAQs cannot be empty'
+      }
     },
     PrivacyPolicy: {
       type: String,
       default: "No Data",
       trim: true,
-      validate: [value => value.length > 0, 'Privacy Policy cannot be empty']
+      validate: {
+        validator: (value) => value.length > 0,
+        message: 'Privacy Policy cannot be empty'
+      }
     },
     TermsOfService: {
       type: String,
       default: "No Data",
       trim: true,
-      validate: [value => value.length > 0, 'Terms of Service cannot be empty']
+      validate: {
+        validator: (value) => value.length > 0,
+        message: 'Terms of Service cannot be empty'
+      }
     },
     PlatformConsent: {
       type: String,
       default: "No Data",
       trim: true,
-      validate: [value => value.length > 0, 'Platform Consent cannot be empty']
+      validate: {
+        validator: (value) => value.length > 0,
+        message: 'Platform Consent cannot be empty'
+      }
     },
     Disclaimer: {
       type: String,
       default: "No Data",
       trim: true,
-      validate: [value => value.length > 0, 'Disclaimer cannot be empty']
+      validate: {
+        validator: (value) => value.length > 0,
+        message: 'Disclaimer cannot be empty'
+      }
     },
     CustomerSupport: {
       type: String,
       default: "No Data",
       trim: true,
-      validate: [value => value.length > 0, 'Customer Support cannot be empty']
+      validate: {
+        validator: (value) => value.length > 0,
+        message: 'Customer Support cannot be empty'
+      }
     }
   }
 }, {

@@ -1,26 +1,5 @@
 const mongoose = require('mongoose');
 
-const bioRefSubCategorySchema = new mongoose.Schema({
-  categoryName: String,
-  categoryOptions: [{
-    categoryType: String,
-    min: Number,
-    max: Number,
-    unit: String,
-  }],
-}, { _id: false });
-
-const bioRefCustomCategorySchema = new mongoose.Schema({
-  categoryName: String,
-  subCategory: bioRefSubCategorySchema,
-  categoryOptions: [{
-    categoryType: String,
-    min: Number,
-    max: Number,
-    unit: String,
-  }],
-}, { _id: false });
-
 const genderRangeDetailsSchema = new mongoose.Schema({
   menopause: { type: Boolean, default: false },
   pregnant: { type: Boolean, default: false },
@@ -32,10 +11,23 @@ const genderRangeDetailsSchema = new mongoose.Schema({
   prePuberty: { type: Boolean, default: false },
 }, { _id: false });
 
+const bioRefSubCategorySchema = new mongoose.Schema({
+  categoryType: String,
+  min: Number,
+  max: Number,
+  unit: String,
+}, { _id: false });
+
+const bioRefCustomCategorySchema = new mongoose.Schema({
+  categoryName: String,
+  subCategory: bioRefSubCategorySchema,
+  categoryOptions: [bioRefSubCategorySchema],
+}, { _id: false });
+
 const parametersSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
+    required: [true, 'Parameter name is required'],
     trim: true,
   },
   description: {
@@ -55,7 +47,7 @@ const parametersSchema = new mongoose.Schema({
         ageRangeType: { 
           type: String, 
           enum: ['pediatric', 'senior', 'adult'],
-          required: true,
+          required: [true, 'Age range type is required'],
         },
         unit: String,
         min: Number,
@@ -65,7 +57,7 @@ const parametersSchema = new mongoose.Schema({
         genderRangeType: { 
           type: String, 
           enum: ['male', 'female', 'other'],
-          required: true,
+          required: [true, 'Gender range type is required'],
         },
         unit: String,
         min: Number,
@@ -88,12 +80,5 @@ const parametersSchema = new mongoose.Schema({
   timestamps: true, // Automatically adds createdAt and updatedAt timestamps
 });
 
-// Exclude logically deleted documents by default in find queries
-parametersSchema.pre(/^find/, function(next) {
-  this.where({ deletedAt: null });
-  next();
-});
-
-const ParametersModel = mongoose.model('Parameter', parametersSchema);
-
-module.exports = ParametersModel;
+// Export the model directly from the schema definition
+module.exports = mongoose.model('Parameter', parametersSchema);

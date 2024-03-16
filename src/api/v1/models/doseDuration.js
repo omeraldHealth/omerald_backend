@@ -4,8 +4,11 @@ const doseDurationSchema = new mongoose.Schema({
   duration: {
     type: {
       type: String, 
-      required: [true, 'Duration type is required'], // Enhanced readability with validation message
-      enum: ['days', 'weeks', 'months', 'years'], // Assuming these are your intended types
+      required: [true, 'Duration type is required'],
+      enum: {
+        values: ['days', 'weeks', 'months', 'years'],
+        message: 'Invalid duration type. Must be one of: days, weeks, months, years'
+      },
       trim: true
     },
     value: {
@@ -22,5 +25,5 @@ const doseDurationSchema = new mongoose.Schema({
   timestamps: true // Automatically adds createdAt and updatedAt fields
 });
 
-const DoseDurationModel = mongoose.model('DoseDuration', doseDurationSchema);
-module.exports = DoseDurationModel;
+// Export the model directly from the schema definition
+module.exports = mongoose.model('DoseDuration', doseDurationSchema);

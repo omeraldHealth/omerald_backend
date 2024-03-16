@@ -4,10 +4,10 @@ const mongoose = require('mongoose');
 const createUnitValidator = (unitName) => ({
   type: Number,
   default: 0,
-  min: [0, `${unitName} must be a positive number`], // Ensures the value is non-negative with a custom message
+  min: [0, `${unitName} must be a positive number`],
   validate: {
     validator: Number.isInteger,
-    message: `${unitName} must be an integer` // Provides a clear message for validation failure
+    message: `${unitName} must be an integer`
   }
 });
 
@@ -17,23 +17,23 @@ const validitySchema = new mongoose.Schema({
   week: createUnitValidator('week'),
   day: createUnitValidator('day'),
   hour: createUnitValidator('hour')
-}, { _id: false }); // Prevents automatic creation of _id for this sub-document
+}, { _id: false });
 
 const sampleSchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, 'Sample name is required'],
-    unique: [true, 'Sample name must be unique'],
-    trim: true, // Trims whitespace
+    unique: true, // Unique constraint directly specified
+    trim: true,
   },
   description: {
     type: String,
-    trim: true, // Ensures clean and consistent data storage
+    trim: true,
     default: ''
   },
   imageUrl: {
     type: String,
-    trim: true, // Cleans up the imageUrl field
+    trim: true,
     default: ''
   },
   deletedAt: {
@@ -44,11 +44,14 @@ const sampleSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
-  validity: validitySchema // Incorporates the validitySchema
+  validity: validitySchema
 }, {
-  timestamps: true // Enables automatic handling of createdAt and updatedAt timestamps
+  timestamps: true
 });
 
-const SamplesModel = mongoose.model('Sample', sampleSchema); // Singular form for the model name as a best practice
+// Index for improving query performance on frequently accessed fields
+sampleSchema.index({ name: 1 });
 
-module.exports = SamplesModel;
+const SampleModel = mongoose.model('Sample', sampleSchema);
+
+module.exports = SampleModel;

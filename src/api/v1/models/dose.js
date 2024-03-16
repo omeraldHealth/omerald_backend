@@ -19,8 +19,10 @@ const doseSchema = new mongoose.Schema({
   type: {
     type: Number,
     required: [true, 'Dose type is required'],
-    enum: [1, 2, 3], // Enum to ensure type value is among the defined options
-    // 1 = Recommended age, 2 = Catch up age range, 3 = Vaccine in special situations
+    enum: {
+      values: [1, 2, 3],
+      message: 'Invalid dose type. Must be one of: 1 = Recommended age, 2 = Catch up age range, 3 = Vaccine in special situations'
+    }
   },
   deletedAt: {
     type: Date,
@@ -30,5 +32,5 @@ const doseSchema = new mongoose.Schema({
   timestamps: true, // Automatically add createdAt and updatedAt timestamps
 });
 
-const DoseModel = mongoose.model('doses', doseSchema);
-module.exports = DoseModel;
+// Export the model directly from the schema definition
+module.exports = mongoose.model('Dose', doseSchema);

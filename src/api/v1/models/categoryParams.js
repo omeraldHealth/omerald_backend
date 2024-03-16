@@ -3,36 +3,19 @@ const mongoose = require('mongoose');
 const categorySchema = new mongoose.Schema({
   categoryName: {
     type: String,
-    required: [true, 'Category name is required'], // Adding a validation message
-    trim: true, // Trims whitespace around the category name
-    unique: true, // Ensures categoryName is unique across all documents
+    required: [true, 'Category name is required'],
+    trim: true,
+    unique: [true, 'Category name must be unique'], // Clarified the uniqueness constraint with a message
   },
   categoryOptions: {
     type: [String],
-    default: [],
-  },
-  createdTime: {
-    type: Date,
-    default: Date.now,
-    immutable: true, // Ensures createdTime cannot be modified
-  },
-  lastUpdatedTime: {
-    type: Date,
-    default: Date.now,
-  },
+    default: []
+  }
 }, {
-  timestamps: { createdAt: 'createdTime', updatedAt: 'lastUpdatedTime' }, // Use Mongoose's timestamps option
+  timestamps: true // Simplified timestamp handling
 });
 
-// Ensure the `unique` property on `categoryName` is enforced.
-// Note: Mongoose's `unique` isn't a validator but tells Mongoose to create a unique index.
-categorySchema.index({ categoryName: 1 }, { unique: true });
-
-// Pre-update middleware for `updateOne` and `findOneAndUpdate` operations
-categorySchema.pre(['updateOne', 'findOneAndUpdate'], function(next) {
-  this.set({ lastUpdatedTime: new Date() }); // Correctly update lastUpdatedTime
-  next();
-});
+categorySchema.index({ categoryName: 1 }, { unique: true, background: true });
 
 const Category = mongoose.model('Category', categorySchema);
 
