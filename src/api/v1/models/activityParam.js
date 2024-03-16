@@ -13,10 +13,10 @@ const userActivitySchema = new mongoose.Schema({
   insertedIds: [{type: String}],
   content: {
     type: String,
-    required: true,
-    enum: ['dc', 'reports', 'params', 'samples', 'vaccines', 'doses', 'doseDuration']
+    // required: true,
+    // enum: ['dc', 'reports', 'params', 'samples', 'vaccines', 'doses', 'doseDuration']
   },
-  contentName: { type: String, required: true }, // e.g., 'branch "apollo jay"'
+  contentName: { type: String }, // e.g., 'branch "apollo jay"'
 });
 
 // Optionally, you might want to index fields commonly queried upon

@@ -4,7 +4,6 @@ const diagnosticSetting = require("../controllers/diagnosticSettings")
 
 // GET all Diagnostics
 router.get('/getDiagnosticSetting', diagnosticSetting.getDiagnosticSetting);
-router.get('/getDiagnosticSettingByKey/:key', diagnosticSetting.getDiagnosticSettingByKey);
 router.post('/addDiagnosticSetting', diagnosticSetting.createDiagnosticSetting);
 router.put('/updateDiagnosticSetting', diagnosticSetting.updateDiagnosticSetting);
 
