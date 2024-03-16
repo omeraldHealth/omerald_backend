@@ -1,26 +1,32 @@
 const VaccinesModel = require('../models/vaccine');
 const xlsx = require('xlsx');
-// Get all Vaccine
+
+// Get all vaccines
 const getVaccine = async (req, res) => {
   try {
-    const vaccine = await VaccinesModel.find({deletedAt: null});
-    res.json(vaccine);
+    const vaccines = await VaccinesModel.find({ deletedAt: null });
+    res.json(vaccines);
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error: ' + error.message });
   }
 };
 
-// Create a new Vaccine
+// Create a new vaccine
 const createVaccine = async (req, res) => {
   const { name } = req.body;
   try {
-    const vaccine = await VaccinesModel.create({name});
+    if (!name || typeof name !== 'string' || name.trim() === '') {
+      res.status(500).json("Invalid Name");
+    }
+
+    const vaccine = await VaccinesModel.create({ name: name.trim() });
     res.status(201).json(vaccine);
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' + error });
+    res.status(500).json({ error: 'Internal server error: ' + error.message });
   }
 };
 
+// Create multiple vaccines from an Excel file
 const createManyVaccines = async (req, res) => {
   if (!req.file) {
     return res.status(400).send('No file uploaded.');
@@ -31,119 +37,89 @@ const createManyVaccines = async (req, res) => {
   const worksheet = workbook.Sheets[worksheetName];
   const jsonData = xlsx.utils.sheet_to_json(worksheet);
 
-  if (worksheetName === "vaccines") {
-    // Fetch existing vaccines to avoid duplicates and ensure they're not marked as deleted
-    const existingVaccines = await VaccinesModel.find({ deletedAt: null }).select('name -_id');
+  if (worksheetName !== 'vaccines') {
+    return res.status(400).send("Incorrect worksheet name. Please use 'vaccines'.");
+  }
+
+  try {
+    const existingVaccines = await VaccinesModel.find({ deletedAt: null }).select('name');
     const existingNames = new Set(existingVaccines.map(vaccine => vaccine.name));
 
-    // Validate and prepare data
     const validatedData = jsonData.filter(vaccine => {
-      const isValidName = typeof vaccine.name === 'string' && vaccine.name.trim() !== '';
-      // Perform initial filtering to remove existing names
-      return isValidName && !existingNames.has(vaccine.name.trim());
+      return typeof vaccine.name === 'string' && vaccine.name.trim() !== '' && !existingNames.has(vaccine.name.trim());
     }).map(vaccine => {
-      // Basic structure validation and sanitization
       return {
         name: vaccine.name.trim(),
         type: typeof vaccine.type === 'string' ? vaccine.type : undefined,
         recommendedFor: Array.isArray(vaccine.recommendedFor) ? vaccine.recommendedFor : (typeof vaccine.recommendedFor === 'string' ? vaccine.recommendedFor.split(',') : []),
-        // Assume other fields are validated and sanitized accordingly
+        // Add validations for other fields as needed
       };
-    }).filter(vaccine => vaccine.name && vaccine.type); // Ensure valid entries
+    }).filter(vaccine => vaccine.name && vaccine.type);
 
     if (validatedData.length === 0) {
       return res.status(400).json({ message: "No new vaccines were added. They may already be present or the file was empty." });
     }
 
-    // Batch insert while respecting the limit of 50 entries
-    const insertedVaccines = [];
-    for (let i = 0; i < validatedData.length; i += 50) {
-      const batch = validatedData.slice(i, i + 50);
-      const insertResult = await VaccinesModel.insertMany(batch, { ordered: false }).catch(e => {
-        // Handle the duplicate key error or other insertion errors
-        return e;
-      });
-      insertedVaccines.push(...insertResult);
-    }
-
-    // If there were any successful inserts, assume success
-    if (insertedVaccines.length > 0) {
-      const insertedIds = insertedVaccines.map(vaccine => vaccine._id);
-      res.status(200).json({ message: "Vaccines added successfully", count: insertedIds.length, insertedIds });
-    } else {
-      // If all batches failed (highly unlikely), return a generic failure message
-      res.status(400).json({ message: "Failed to add new vaccines. Please check your data and try again." });
-    }
-  } else {
-    res.status(400).send("Incorrect worksheet name. Please use 'vaccines'.");
+    const insertedVaccines = await VaccinesModel.insertMany(validatedData, { ordered: false });
+    res.status(200).json({ message: "Vaccines added successfully", count: insertedVaccines.length, insertedIds: insertedVaccines.map(vaccine => vaccine._id) });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error: ' + error.message });
   }
 };
 
-
-// Update a Vaccine by ID
+// Update a vaccine by ID
 const updateVaccine = async (req, res) => {
-  const { id,name } = req.body;
+  const { id, name } = req.body;
   try {
     const vaccine = await VaccinesModel.findByIdAndUpdate(id, { name }, { new: true });
     if (!vaccine) {
-      return res.status(404).json({ error: 'vaccine not found' });
+      return res.status(404).json({ error: 'Vaccine not found' });
     }
     res.json(vaccine);
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error: ' + error.message });
   }
 };
 
+// Delete a vaccine by ID
 const deleteVaccine = async (req, res) => {
   const { id } = req.params;
   try {
-    // Fetch the current user to get the phoneNumber
     const vaccine = await VaccinesModel.findById(id);
-    
     if (!vaccine) {
-      throw new Error('User not found');
+      throw new DatabaseError('Vaccine not found');
     }
-
-    // Append current timestamp to phoneNumber
     const timestamp = Date.now();
-    const updatedPhoneNumber = `${vaccine.name}*${timestamp}`;
-
-    // Update phoneNumber and set deletedAt
+    const updatedName = `${vaccine.name}*${timestamp}`;
     await VaccinesModel.updateOne({ _id: id }, {
       $set: {
-        phoneNumber: updatedPhoneNumber,
+        name: updatedName,
         deletedAt: new Date()
       }
     });
-
     res.json({ message: 'Vaccine deleted successfully' });
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
-    // Handle error appropriately
+    res.status(500).json({ error: 'Internal server error: ' + error.message });
   }
 };
 
+// Get vaccines by IDs
 const getVaccinesByIds = async (req, res) => {
   try {
-      const { ids } = req.body;
-
-      if (!Array.isArray(ids) || ids.length === 0) {
-          return res.status(400).json({ error: 'Invalid input. IDs must be provided as a non-empty array.' });
-      }
-
-      const vaccines = await VaccinesModel.find({ _id: { $in: ids }, deletedAt: null });
-
-      if (!vaccines || vaccines.length === 0) {
-          return res.status(404).json({ message: 'No vaccines found with the provided IDs.' });
-      }
-
-      res.status(200).json(vaccines);
+    const { ids } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: 'Invalid input. IDs must be provided as a non-empty array.' });
+    }
+    const vaccines = await VaccinesModel.find({ _id: { $in: ids }, deletedAt: null });
+    if (!vaccines || vaccines.length === 0) {
+      return res.status(404).json({ message: 'No vaccines found with the provided IDs.' });
+    }
+    res.status(200).json(vaccines);
   } catch (error) {
-      console.error('Error fetching vaccines:', error);
-      res.status(500).json({ error: 'Internal server error' });
+    console.error('Error fetching vaccines:', error);
+    res.status(500).json({ error: 'Internal server error: ' + error.message });
   }
 };
-
 
 module.exports = {
   getVaccine,

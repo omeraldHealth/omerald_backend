@@ -1,27 +1,34 @@
 const UserSettingsModel = require('../models/userSettings');
 
-// Get all userSetting
+// Get the user settings
 const getUserSetting = async (req, res) => {
   try {
-    const userSetting = await UserSettingsModel.find();
+    const userSetting = await UserSettingsModel.findOne();
+    if (!userSetting) {
+      throw new DatabaseError('No user settings found');
+    }
     res.json(userSetting);
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error: ' + error.message });
   }
 };
 
-// Create a new userSetting
+// Create a new user setting
 const createUserSetting = async (req, res) => {
-  const {settings} = req.body;
+  const { settings } = req.body;
   try {
+    if (!settings || typeof settings !== 'object' || Array.isArray(settings)) {
+      res.status(400).json({ error: 'Invalid settings object' });
+    }
+
     const userSetting = await UserSettingsModel.create(settings);
     res.status(201).json(userSetting);
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' + error });
+    res.status(500).json({ error: 'Internal server error: ' + error.message });
   }
 };
 
-// Update a userSetting by ID
+// Update the user settings
 const updateUserSetting = async (req, res) => {
   try {
     // Since there's only one settings document, we can use an empty filter object.
@@ -40,7 +47,6 @@ const updateUserSetting = async (req, res) => {
     res.status(500).json({ error: 'Internal server error: ' + error.message });
   }
 };
-
 
 module.exports = {
   getUserSetting,
