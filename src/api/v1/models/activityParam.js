@@ -1,25 +1,49 @@
 const mongoose = require('mongoose');
 
 const userActivitySchema = new mongoose.Schema({
-  userName: { type: String, required: true },
-  action: { 
-    type: String, 
-    required: true, 
-    enum: ['created', 'updated', 'deleted', 'uploaded', 'imported'], // Enum to restrict action to CRUD operations
+  userName: {
+    type: String,
+    required: true,
+    trim: true,
+    index: true,
   },
-  details: { type: String }, // Additional details if needed, for example, specifics of what was created, updated, etc.
-  timestamp: { type: Date, default: Date.now }, // Automatically capture the time of the activity
-  deletedAt: { type: Date, default: null },
-  insertedIds: [{type: String}],
+  action: {
+    type: String,
+    required: true,
+    enum: ['created', 'updated', 'deleted', 'uploaded', 'imported'],
+  },
+  details: {
+    type: String,
+    trim: true,
+    default: null,
+  },
+  timestamp: {
+    type: Date,
+    default: Date.now,
+  },
+  deletedAt: {
+    type: Date,
+    default: null,
+  },
+  insertedIds: [{
+    type: String,
+    trim: true,
+    default: [],
+  }],
   content: {
     type: String,
-    // required: true,
-    // enum: ['dc', 'reports', 'params', 'samples', 'vaccines', 'doses', 'doseDuration']
+    required: true,
+    trim: true,
   },
-  contentName: { type: String }, // e.g., 'branch "apollo jay"'
+  contentName: {
+    type: String,
+    trim: true,
+    default: null,
+  },
+}, {
+  timestamps: { createdAt: 'createdTime', updatedAt: 'lastUpdatedTime' },
 });
 
-// Optionally, you might want to index fields commonly queried upon
 userActivitySchema.index({ userName: 1, timestamp: -1 });
 
 const UserActivity = mongoose.model('UserActivity', userActivitySchema);

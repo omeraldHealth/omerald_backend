@@ -1,22 +1,33 @@
 const express = require('express');
-const routeImports = require('./routes');
+const routeImports = require('./routes'); // Assuming this contains your route definitions
+const { cacheMiddleware } = require('./middleware');
 
 const router = express.Router();
+const API_PREFIX = '/api/v1';
 
-router.use('/api/v1/users', routeImports.userRoutes);
-router.use('/api/v1/analysedParams', routeImports.analysedParamRoutes);
-router.use('/api/v1/diagnosedConditions', routeImports.diagnosedConditionRoutes);
-router.use('/api/v1/doseDuration', routeImports.doseDurationRoutes);
-router.use('/api/v1/doses', routeImports.dosesRoutes);
-router.use('/api/v1/vaccine', routeImports.vaccineRoutes);
-router.use('/api/v1/ignoredParams', routeImports.ignoredParamRouter);
-router.use('/api/v1/parameter', routeImports.parameterRouter);
-router.use('/api/v1/reports', routeImports.reportRouter);
-router.use('/api/v1/samples', routeImports.sampleRouter);
-router.use('/api/v1/userSettings', routeImports.userSettingRouter);
-router.use('/api/v1/diagSettings', routeImports.diagSettingRouter);
-router.use('/api/v1/health', routeImports.healthRouter);
-router.use('/api/v1/activity', routeImports.activityRouter);
-router.use('/api/v1/category', routeImports.categoryRouter);
+// Define your route configurations
+const routeConfig = [
+    { path: '/users', route: routeImports.userRoutes },
+    { path: '/analysedParams', route: routeImports.analysedParamRoutes },
+    { path: '/diagnosedConditions', route: routeImports.diagnosedConditionRoutes },
+    { path: '/doseDuration', route: routeImports.doseDurationRoutes },
+    { path: '/doses', route: routeImports.dosesRoutes },
+    { path: '/vaccine', route: routeImports.vaccineRoutes },
+    { path: '/ignoredParams', route: routeImports.ignoredParamRouter },
+    { path: '/parameter', route: routeImports.parameterRouter },
+    { path: '/reports', route: routeImports.reportRouter },
+    { path: '/samples', route: routeImports.sampleRouter },
+    { path: '/userSettings', route: routeImports.userSettingRouter },
+    { path: '/diagSettings', route: routeImports.diagSettingRouter },
+    { path: '/health', route: routeImports.healthRouter },
+    { path: '/activity', route: routeImports.activityRouter },
+    { path: '/category', route: routeImports.categoryRouter },
+];
+
+
+// Apply cache middleware and set up routes dynamically
+routeConfig.forEach(({ path, route }) => {
+  router.use(`${API_PREFIX}${path}`, cacheMiddleware, route);
+});
 
 module.exports = router;
