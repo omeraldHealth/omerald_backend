@@ -12,6 +12,6 @@ router.post('/addDoseDuration', doseDurationController.createDoseDuration);
 router.post('/addManyDoseDuration', upload.single("file"), doseDurationController.createManyDoseDuration);
 router.put('/updateDoseDuration', doseDurationController.updateDoseDuration);
 router.delete('/deleteDoseDuration/:id', doseDurationController.deleteDoseDuration);
-router.post('/getAllDoseDurationByIds/:id', doseDurationController.getDoseDurationsByIds);
+router.post('/getAllDoseDurationByIds', doseDurationController.getDoseDurationsByIds);
 
 module.exports = router;
