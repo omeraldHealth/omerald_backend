@@ -1,5 +1,4 @@
 const userRoutes = require("../api/v1/routes/userRouter");
-const analysedParamRoutes = require("../api/v1/routes/analysedParamRouter");
 const diagnosedConditionRoutes = require("../api/v1/routes/diagnosedCondition");
 const doseDurationRoutes = require("../api/v1/routes/doseDurationRouter");
 const dosesRoutes = require("../api/v1/routes/dosesRouter");
@@ -16,7 +15,6 @@ const categoryRouter = require("../api/v1/routes/categoryRouter");
 
 module.exports = {
   userRoutes,
-  analysedParamRoutes,
   diagnosedConditionRoutes,
   doseDurationRoutes,
   dosesRoutes,

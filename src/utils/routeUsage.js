@@ -8,7 +8,6 @@ const API_PREFIX = '/api/v1';
 // Define your route configurations
 const routeConfig = [
     { path: '/users', route: routeImports.userRoutes },
-    { path: '/analysedParams', route: routeImports.analysedParamRoutes },
     { path: '/diagnosedConditions', route: routeImports.diagnosedConditionRoutes },
     { path: '/doseDuration', route: routeImports.doseDurationRoutes },
     { path: '/doses', route: routeImports.dosesRoutes },
