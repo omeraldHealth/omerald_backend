@@ -32,7 +32,6 @@ const updateDiagnosticSetting = async (req, res) => {
     // Using 'findOneAndUpdate' with an empty filter.
     // This will update the first document found or insert if none exists.
     const userSetting = await DiagnosticSettingsModel.findOneAndUpdate(filter, update, options);
-    console.log(userSetting)
     res.json(userSetting);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' + error });
