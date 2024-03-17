@@ -43,18 +43,30 @@ exports.updateDiagnosedConditions = async (req, res) => {
 };
 
 // Soft delete DiagnosedCondition by ID
-exports.deleteDiagnosedCondition = expressAsyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const diagnosedCondition = await DiagnoseConditionsModel.findByIdAndUpdate(id, {
-    $set: {
-      deletedAt: new Date()
+exports.deleteDiagnosedCondition = async (req, res) => {
+    const { id } = req.params;
+  
+    // Retrieve the current document to access its title
+    const diagnosedCondition = await DiagnoseConditionsModel.findById(id);
+
+    if (!diagnosedCondition) {
+      return res.status(404).json({ error: 'DiagnosedCondition not found' });
     }
-  });
-  if (!diagnosedCondition) {
-    return res.status(404).json({ error: 'DiagnosedCondition not found' });
-  }
-  res.json({ message: 'DiagnosedCondition deleted successfully' });
-});
+
+    // Generate a timestamp string
+    const timestamp = new Date().toISOString().replace(/:/g, '-'); // Replace colons to avoid file path issues
+    const updatedTitle = `${diagnosedCondition.title}_${timestamp}`;
+
+    // Update the document to append the timestamp to its title and set the deletedAt field
+    await DiagnoseConditionsModel.findByIdAndUpdate(id, {
+      $set: {
+        title: updatedTitle,
+        deletedAt: new Date()
+      }
+    });
+
+    res.json({ message: 'DiagnosedCondition deleted successfully' });
+};
 
 // Search DiagnosedConditions
 exports.searchDiagnosedCondition = async (req, res) => {
