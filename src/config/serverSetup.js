@@ -11,7 +11,7 @@ const routeUsage = require('./../utils/routeUsage');
 // Configure CORS options for a list of whitelisted domains
 const configureCORSOptions = () => {
   const whitelist = [
-    'http://localhost',
+    'http://localhost:3000',
     'https://admin-omerald-dev.vercel.app',
     'https://admin-omerald-qa.vercel.app',
     'https://admin-omerald.vercel.app',
@@ -23,13 +23,14 @@ const configureCORSOptions = () => {
       if (whitelist.includes(origin) || !origin) {
         callback(null, true);
       } else {
-        callback(new Error('Not allowed by CORS'));
+        callback(new Error('Not allowed by CORS'), false);
       }
     },
     credentials: true,
-    optionSuccessStatus: 200,
+    optionsSuccessStatus: 200,
   };
 };
+
 
 // Setup rate limiting to prevent abuse
 const setupRateLimiting = () => rateLimit({
