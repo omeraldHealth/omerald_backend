@@ -33,14 +33,14 @@ exports.createDiagnosedConditions = expressAsyncHandler(async (req, res) => {
 });
 
 // Update DiagnosedCondition by ID
-exports.updateDiagnosedConditions = expressAsyncHandler(async (req, res) => {
+exports.updateDiagnosedConditions = async (req, res) => {
   const { id } = req.body;
   const diagnosedCondition = await DiagnoseConditionsModel.findByIdAndUpdate(id, req.body, { new: true });
   if (!diagnosedCondition) {
     return res.status(404).json({ error: 'DiagnosedCondition not found' });
   }
   res.json({ message: 'DiagnosedCondition updated successfully', diagnosedCondition });
-});
+};
 
 // Soft delete DiagnosedCondition by ID
 exports.deleteDiagnosedCondition = expressAsyncHandler(async (req, res) => {
@@ -57,7 +57,7 @@ exports.deleteDiagnosedCondition = expressAsyncHandler(async (req, res) => {
 });
 
 // Search DiagnosedConditions
-exports.searchDiagnosedCondition = expressAsyncHandler(async (req, res) => {
+exports.searchDiagnosedCondition = async (req, res) => {
   const { query = '', page = 1 } = req.query;
   const pageSize = 20;
   const skip = (page - 1) * pageSize;
@@ -77,7 +77,7 @@ exports.searchDiagnosedCondition = expressAsyncHandler(async (req, res) => {
     page,
     totalPages: Math.ceil(totalResults / pageSize)
   });
-});
+};
 
 // Create multiple DiagnosedConditions from Excel file
 exports.createManyDiagnosedConditions = expressAsyncHandler(async (req, res) => {
