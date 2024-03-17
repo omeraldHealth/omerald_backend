@@ -21,7 +21,7 @@ const healthTopicLinkSchema = new mongoose.Schema({
   },
   url: {
     type: String,
-    required: [true, 'Health topic link URL is required.'],
+    // required: [true, 'Health topic link URL is required.'],
     trim: true,
     validate: urlValidator, // Using custom validator for URL validation
   },
@@ -50,7 +50,6 @@ const diagnoseConditionsSchema = new mongoose.Schema({
     type: String,
     trim: true,
     default: '',
-    validate: urlValidator, // Using custom validator for URL validation
   },
   aliases: [{
     type: String,
@@ -62,10 +61,6 @@ const diagnoseConditionsSchema = new mongoose.Schema({
   },
   healthTopicLinks: {
     type: [healthTopicLinkSchema],
-    validate: {
-      validator: (value) => value.length > 0,
-      message: 'At least one health topic link is required.',
-    },
   },
   deletedAt: {
     type: Date,

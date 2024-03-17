@@ -4,9 +4,6 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 
-// Mock console.log to prevent logging during test execution
-console.log = jest.fn();
-
 // Mock environment variables
 process.env.API_USER = 'testuser';
 process.env.API_PASSWORD_HASH = bcrypt.hashSync('testpassword', 10);

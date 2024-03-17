@@ -1,6 +1,6 @@
 const express = require('express');
 const routeImports = require('./routes'); // Assuming this contains your route definitions
-const { cacheMiddleware } = require('./middleware');
+// const { cacheMiddleware } = require('./middleware');
 
 const router = express.Router();
 const API_PREFIX = '/api/v1';
@@ -25,7 +25,7 @@ const routeConfig = [
 
 // Apply cache middleware and set up routes dynamically
 routeConfig.forEach(({ path, route }) => {
-  router.use(`${API_PREFIX}${path}`, cacheMiddleware, route);
+  router.use(`${API_PREFIX}${path}`, route);
 });
 
 module.exports = router;

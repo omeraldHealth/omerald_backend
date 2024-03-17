@@ -3,7 +3,7 @@ const UserSettingsModel = require('../models/userSettings');
 // Get the user settings
 const getUserSetting = async (req, res) => {
   try {
-    const userSetting = await UserSettingsModel.findOne();
+    const userSetting = await UserSettingsModel.find();
     if (!userSetting) {
       throw new DatabaseError('No user settings found');
     }
