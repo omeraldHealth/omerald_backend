@@ -8,30 +8,6 @@ const authenticateToken = require('./../utils/middleware').authenticateToken;
 const authenticateAPIUser = require('./../api/v1/controllers/authentication').authenticateAPIUser;
 const routeUsage = require('./../utils/routeUsage');
 
-// Configure CORS options for a list of whitelisted domains
-const configureCORSOptions = () => {
-  const whitelist = [
-    'http://localhost:3000',
-    'https://admin-omerald-dev.vercel.app',
-    'https://admin-omerald-qa.vercel.app',
-    'https://admin-omerald.vercel.app',
-    'https://admin.omerald.com',
-  ];
-  
-  return {
-    origin: (origin, callback) => {
-      if (whitelist.includes(origin) || !origin) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'), false);
-      }
-    },
-    credentials: true,
-    optionsSuccessStatus: 200,
-  };
-};
-
-
 // Setup rate limiting to prevent abuse
 const setupRateLimiting = () => rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutes
@@ -42,10 +18,16 @@ const setupRateLimiting = () => rateLimit({
 function setupServer(port) {
   const app = express();
 
-  // Middleware setup for security and performance
-  app.use(cors(configureCORSOptions()));
-  app.use(compression());
-  app.use(helmet());
+  // CORS setup
+  const corsOptions = {
+    origin: '*',
+    credentials: true,
+    optionSuccessStatus: 200
+  };
+  app.use(cors(corsOptions));
+  app.options('*', cors(corsOptions));
+  
+  // Middleware setup
   app.use(express.json());
   
   // Setup security policies
