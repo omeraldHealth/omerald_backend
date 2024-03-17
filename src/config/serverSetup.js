@@ -2,19 +2,10 @@ const express = require('express');
 const compression = require('compression');
 const cors = require('cors');
 const connectToMongoDB = require('./mongooseSetup');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
 const authenticateToken = require('./../utils/middleware').authenticateToken;
 const authenticateAPIUser = require('./../api/v1/controllers/authentication').authenticateAPIUser;
 const routeUsage = require('./../utils/routeUsage');
 
-// Setup rate limiting to prevent abuse
-const setupRateLimiting = () => rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 250, // Limit each IP to 250 requests per windowMs
-});
-
-// Initialize and configure the Express application
 function setupServer(port) {
   const app = express();
 
@@ -29,16 +20,15 @@ function setupServer(port) {
   
   // Middleware setup
   app.use(express.json());
+  app.use(compression());
+  app.use(routeUsage);
   
-  // Setup security policies
+  // Set CORS headers
   app.use((req, res, next) => {
     res.setHeader('Referrer-Policy', 'no-referrer');
-    res.setHeader('Content-Security-Policy', "default-src 'self'");
+    res.setHeader('Content-Security-Policy', 'default-src *');
     next();
   });
-
-  // Apply rate limiting middleware
-  app.use(setupRateLimiting());
 
   // Define public and authenticated routes
   app.post('/api/v1/auth/getAuthToken', authenticateAPIUser);
@@ -52,6 +42,10 @@ function setupServer(port) {
   app.listen(port, () => {
     console.log(`Server running on port ${port}`);
   });
+
+  // Mongoose connection setup
+  const mongodbURI = process.env.MONGODB_URI;
+  connectToMongoDB(mongodbURI);
 
   return app;
 }
