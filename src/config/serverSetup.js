@@ -2,68 +2,58 @@ const express = require('express');
 const compression = require('compression');
 const cors = require('cors');
 const connectToMongoDB = require('./mongooseSetup');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const authenticateToken = require('./../utils/middleware').authenticateToken;
-const authenticateAPIUser = require('./../api/v1/controllers/authentication').authenticateAPIUser;
 const routeUsage = require('./../utils/routeUsage');
+const { authenticateAPIUser } = require('../api/v1/controllers/authentication');
+const { authenticateToken } = require('../utils/middleware');
 
-// Configure CORS options for a list of whitelisted domains
-const configureCORSOptions = () => {
-  const whitelist = [
-    'http://localhost:3000',
-    'https://admin-omerald-dev.vercel.app',
-    'https://admin-omerald-qa.vercel.app',
-    'https://admin-omerald.vercel.app',
-    'https://admin.omerald.com',
-  ];
-  
-  return {
-    origin: (origin, callback) => {
-      if (whitelist.includes(origin) || !origin) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'), false);
-      }
-    },
-    credentials: true,
-    optionsSuccessStatus: 200,
-  };
-};
-
-
-// Setup rate limiting to prevent abuse
-const setupRateLimiting = () => rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 250, // Limit each IP to 250 requests per windowMs
-});
-
-// Initialize and configure the Express application
 function setupServer(port) {
   const app = express();
 
-  // Middleware setup for security and performance
-  app.use(cors(configureCORSOptions()));
-  app.use(compression());
-  app.use(helmet());
-  app.use(express.json());
-  
-  // Setup security policies
+  const corsOptions = {
+    origin: "*",
+    methods: 'GET, POST, PUT, DELETE, OPTIONS',
+    allowedHeaders: '*',
+    credentials: true,
+    optionsSuccessStatus: 200, // For legacy browsers
+    maxAge: 86400 // 24 hours
+  };
+  app.use(cors(corsOptions));
+
+  app.options('*', cors(corsOptions));
   app.use((req, res, next) => {
-    res.setHeader('Referrer-Policy', 'no-referrer');
-    res.setHeader('Content-Security-Policy', "default-src 'self'");
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    if (req.method === 'OPTIONS') {
+        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
+        return res.status(200).json({});
+    }
     next();
+});
+
+  // Middleware setup
+  app.use(express.json());
+  app.use(compression());
+
+  // Example route
+  app.get('/', (req, res) => {
+    res.send('Hello, World!');
   });
 
-  // Apply rate limiting middleware
-  app.use(setupRateLimiting());
 
-  // Define public and authenticated routes
-  app.post('/api/v1/auth/getAuthToken', authenticateAPIUser);
-  app.use(authenticateToken); // Apply JWT authentication to all routes below this line
-  app.use(routeUsage);
   
-  // MongoDB connection
+  // Public route
+  app.post('/api/v1/auth/getAuthToken', authenticateAPIUser);
+
+  // Apply JWT authentication to all subsequent routes
+  app.use(authenticateToken);
+  
+  // Route usage tracking
+  app.use(routeUsage);
+
+  // It's best practice to define your security headers within the cors options or specifically for routes as needed.
+  // Removing the manual CORS header settings here to avoid conflict with the cors middleware
+
+  // MongoDB connection setup
   connectToMongoDB(process.env.MONGODB_URI);
 
   // Start the server
