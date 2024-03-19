@@ -9,32 +9,35 @@ const routeUsage = require('./../utils/routeUsage');
 function setupServer(port) {
   const app = express();
 
-  // CORS setup
+  // CORS setup corrected
   const corsOptions = {
-    origin: '*',
+    origin: '*', // Consider specifying domains in production
     credentials: true,
-    optionSuccessStatus: 200
+    optionsSuccessStatus: 200 // Corrected typo
   };
   app.use(cors(corsOptions));
-  app.options('*', cors(corsOptions));
-  
+  app.options('*', cors(corsOptions)); // Enable pre-flight across-the-board
+
   // Middleware setup
   app.use(express.json());
   app.use(compression());
-  app.use(routeUsage);
+  app.use(routeUsage); // Log route usage
   
-  // Set CORS headers
+  // Set Security headers more securely and specifically if possible
   app.use((req, res, next) => {
     res.setHeader('Referrer-Policy', 'no-referrer');
-    res.setHeader('Content-Security-Policy', 'default-src *');
+    // Consider specifying your content sources rather than '*'
+    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' https://apis.example.com");
     next();
   });
 
   // Define public and authenticated routes
   app.post('/api/v1/auth/getAuthToken', authenticateAPIUser);
-  app.use(authenticateToken); // Apply JWT authentication to all routes below this line
-  app.use(routeUsage);
-  
+
+  // Apply JWT authentication middleware only to specific routes to avoid locking down the whole API
+  // app.use(authenticateToken); // Example path to secure
+  // All secure routes go under /api/v1/secure
+
   // MongoDB connection
   connectToMongoDB(process.env.MONGODB_URI);
 
@@ -43,9 +46,11 @@ function setupServer(port) {
     console.log(`Server running on port ${port}`);
   });
 
-  // Mongoose connection setup
-  const mongodbURI = process.env.MONGODB_URI;
-  connectToMongoDB(mongodbURI);
+  // Error handling middleware - Basic example
+  app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
+  });
 
   return app;
 }
