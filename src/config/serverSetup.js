@@ -2,55 +2,47 @@ const express = require('express');
 const compression = require('compression');
 const cors = require('cors');
 const connectToMongoDB = require('./mongooseSetup');
-const authenticateToken = require('./../utils/middleware').authenticateToken;
-const authenticateAPIUser = require('./../api/v1/controllers/authentication').authenticateAPIUser;
 const routeUsage = require('./../utils/routeUsage');
+const { authenticateAPIUser } = require('../api/v1/controllers/authentication');
+const { authenticateToken } = require('../utils/middleware');
 
 function setupServer(port) {
   const app = express();
 
-  // CORS setup corrected
+  // CORS setup
   const corsOptions = {
-    origin: '*', // Consider specifying domains in production
+    origin: '*',
     credentials: true,
-    optionsSuccessStatus: 200 // Corrected typo
+    optionSuccessStatus: 200
   };
   app.use(cors(corsOptions));
-  app.options('*', cors(corsOptions)); // Enable pre-flight across-the-board
+  app.options('*', cors(corsOptions));
 
   // Middleware setup
   app.use(express.json());
   app.use(compression());
-  app.use(routeUsage); // Log route usage
-  
-  // Set Security headers more securely and specifically if possible
+ // Public route
+ app.post('/api/v1/auth/getAuthToken', authenticateAPIUser);
+
+ // Apply JWT authentication to all subsequent routes
+ app.use(authenticateToken);
+ app.use(routeUsage);
+
+  // Set CORS headers
   app.use((req, res, next) => {
     res.setHeader('Referrer-Policy', 'no-referrer');
-    // Consider specifying your content sources rather than '*'
-    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' https://apis.example.com");
+    res.setHeader('Content-Security-Policy', 'default-src *');
     next();
   });
-
-  // Define public and authenticated routes
-  app.post('/api/v1/auth/getAuthToken', authenticateAPIUser);
-
-  // Apply JWT authentication middleware only to specific routes to avoid locking down the whole API
-  // app.use(authenticateToken); // Example path to secure
-  // All secure routes go under /api/v1/secure
-
-  // MongoDB connection
-  connectToMongoDB(process.env.MONGODB_URI);
 
   // Start the server
   app.listen(port, () => {
     console.log(`Server running on port ${port}`);
   });
 
-  // Error handling middleware - Basic example
-  app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Something broke!');
-  });
+  // Mongoose connection setup
+  const mongodbURI = process.env.MONGODB_URI;
+  connectToMongoDB(mongodbURI);
 
   return app;
 }
