@@ -108,7 +108,7 @@ exports.createManyDiagnosedConditions = expressAsyncHandler(async (req, res) => 
     description: data.description || '',
     imageUrl: data.imageUrl || '',
     aliases: data.aliases ? data.aliases.split(',') : [],
-    isActive: data.isActive === 'true'
+    isActive: data?.isActive === true,
   }));
 
   // Insert or update DiagnosedConditions
