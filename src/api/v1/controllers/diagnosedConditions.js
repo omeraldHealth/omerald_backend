@@ -21,6 +21,7 @@ exports.getDiagnosedConditionById = expressAsyncHandler(async (req, res) => {
 // Create a new DiagnosedCondition
 exports.createDiagnosedConditions = expressAsyncHandler(async (req, res) => {
   const { title, description, imageUrl, aliases, isActive, healthTopicLinks } = req.body;
+  isActive = true;
   const diagnosedCondition = await DiagnoseConditionsModel.create({
     title,
     description,
