@@ -22,7 +22,7 @@ exports.getDiagnosedConditionById = expressAsyncHandler(async (req, res) => {
 exports.createDiagnosedConditions = expressAsyncHandler(async (req, res) => {
   let { title, description, imageUrl, aliases, isActive, healthTopicLinks } = req.body;
   isActive = true;
-  
+
   const diagnosedCondition = await DiagnoseConditionsModel.create({
     title,
     description,
@@ -33,6 +33,7 @@ exports.createDiagnosedConditions = expressAsyncHandler(async (req, res) => {
   });
   res.status(201).json({ message: 'DiagnosedCondition added successfully', diagnosedCondition });
 });
+
 
 // Update DiagnosedCondition by ID
 exports.updateDiagnosedConditions = async (req, res) => {
