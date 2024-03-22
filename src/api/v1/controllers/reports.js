@@ -94,6 +94,7 @@ const createManyReport = expressAsyncHandler(async (req, res) => {
       const insertedIds = insertedReports.map(report => report._id);
 
       res.status(200).json({ message: "Reports inserted successfully", count: insertedIds.length, insertedIds });
+      
     } else {
       res.status(400).json({ message: "Reports already present or found no entries" });
     }
