@@ -51,11 +51,21 @@ const createManySamples = async (req, res) => {
         console.error('Description must be a string');
         return false;
       }
-      if (sample.imageUrl && typeof sample.imageUrl !== 'string') {
-        console.error('ImageUrl must be a string');
-        return false;
-      }
+      const correctedValidityString = sample.validity.replace(/(\w+):/g, '"$1":');
 
+      // Then parse it
+      // sample.validity = JSON.parse(correctedValidityString);
+     // Properly parse the JSON string into an object
+      try {
+        sample.validity = JSON.parse(sample.validity);
+        // Now `sample.validity` is an object, and you can access its properties, e.g., sample.validity.year
+
+        sample.isActive = true; // Assuming you want to set isActive to true as part of your processing
+      } catch (error) {
+        console.error("Parsing error:", error);
+        // Handle parsing error, e.g., invalid JSON format
+      }
+      // Parse and validate validity
       // Deduplication check
       return !existingNames.has(sample.name);
     });
