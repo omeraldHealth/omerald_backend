@@ -34,8 +34,7 @@ const updateUserSetting = async (req, res) => {
     // Since there's only one settings document, we can use an empty filter object.
     // This means "match the first document you find", which in this case, is the only document.
     const filter = {};
-
-    const update = { $set: { settings: req.body[0]?.settings } };
+    const update = { $set: { settings: req.body?.settings } };
     // Setting 'upsert' to true ensures that if no document exists, it will create one.
     const options = { upsert: true, new: true };
 
