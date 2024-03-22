@@ -107,7 +107,7 @@ const deleteSample = async (req, res) => {
 
     // Append current timestamp to the sample name
     const timestamp = Date.now();
-    const updatedName = `${sample.name}*${timestamp}`;
+    const updatedName = `${sample.name}_${timestamp}`;
 
     // Update the sample name and set deletedAt
     await SampleModel.updateOne({ _id: id }, {
