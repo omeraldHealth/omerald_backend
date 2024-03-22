@@ -4,6 +4,7 @@ const DiagnoseConditionsModel = require('../models/diagnosedConditions');
 const SamplesModel = require('../models/sample');
 const ParametersModel = require('../models/parameter');
 const ReportsModel = require('../models/reports');
+const SampleModel = require('../models/sample');
 
 // Get all reports
 const getReport = expressAsyncHandler(async (req, res) => {
@@ -49,12 +50,33 @@ const createManyReport = expressAsyncHandler(async (req, res) => {
   const worksheetName = workbook.SheetNames[0];
   const worksheet = workbook.Sheets[worksheetName];
   const jsonData = xlsx.utils.sheet_to_json(worksheet);
-
+  
   if (worksheetName === "reports") {
     const existingReports = await ReportsModel.find().select('name -_id');
     const existingTitles = new Set(existingReports.map(report => report.name));
+
     const reportsToInsert = await Promise.all(jsonData.map(async (report) => {
-      // Validation and data transformation logic
+      // Split comma-separated values and trim any extra spaces
+      const parameterNames = report.parameters.includes(',') ? report.parameters.split(',').map(param => param.trim()) : [report.parameters.trim()];
+      const sampleNames = report.sampleType.includes(',') ? report.sampleType.split(',').map(sample => sample.trim()) : [report.sampleType.trim()];
+      const diagnosedConditionTitles = report.diagnosedConditions.includes(',') ? report.diagnosedConditions.split(',').map(condition => condition.trim()) : [report.diagnosedConditions.trim()];
+    
+      // Find IDs for parameters
+      const parameters = await ParametersModel.find({ name: { $in: parameterNames.map(name => new RegExp(`\\b${name}\\b`, 'i')) } }).select('_id');
+      // Find IDs for samples, excluding specific patterns
+      const excludePatterns = ['BLOOD REPORT\\*1711103903670']; // Add more patterns to exclude if needed
+      const samples = await SampleModel.find({ name: { $in: sampleNames.map(name => new RegExp(`^(?!.*(?:${excludePatterns.join('|')})).*${name}.*$`, 'i')) } }).select('_id');
+      // Find IDs for diagnosed conditions
+      const diagnosedConditions = await DiagnoseConditionsModel.find({ title: { $in: diagnosedConditionTitles.map(title => new RegExp(`\\b${title}\\b`, 'i')) } }).select('_id');
+
+      return {
+        name: report?.name,
+        description: report?.description,
+        isActive: true,
+        parameters: parameters?.length > 0 ? parameters.map(param => param._id): [],
+        sample:  samples?.length > 0 ? samples.map(sample => sample._id): [],
+        diagnoseConditions:  diagnosedConditions?.length > 0 ? diagnosedConditions.map(condition => condition._id):[],
+      };
     }));
 
     const validatedData = reportsToInsert.filter(obj => !existingTitles.has(obj.name))
