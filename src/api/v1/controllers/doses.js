@@ -63,7 +63,6 @@ const createManyDoses = async (req, res) => {
       // Existing doses
       const existingDoses = await DoseModel.find({}, { name: 1 });
       const existingNames = new Set(existingDoses.map(dose => dose.name));
-      console.log(jsonData)
       // Fetch duration and vaccine details
       const dosesToInsert = await Promise.all(jsonData.map(async dose => {
         if (typeof dose.name !== 'string' || !dose.name || existingNames.has(dose.name)) {
