@@ -140,7 +140,7 @@ const deleteDoses = async (req, res) => {
   const { id, name } = req.params;
   try {
     const timestamp = Date.now();
-    const updatedName = `${name}_${timestamp}`;
+    const updatedName = `${name}_deleted_${timestamp}`;
     const deletedDose = await DoseModel.findByIdAndUpdate(id, { deletedAt: Date.now(), name: updatedName });
     if (!deletedDose) {
       return res.status(404).json({ error: 'Dose not found' });

@@ -130,7 +130,7 @@ const deleteReport = expressAsyncHandler(async (req, res) => {
     }
 
     const timestamp = Date.now();
-    const updatedName = `${report.name}_${timestamp}`;
+    const updatedName = `${report.name}_delete_${timestamp}`;
 
     await ReportsModel.updateOne({ _id: id }, {
       $set: {

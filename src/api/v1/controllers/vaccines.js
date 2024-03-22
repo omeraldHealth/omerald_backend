@@ -91,7 +91,7 @@ const deleteVaccine = async (req, res) => {
       throw new DatabaseError('Vaccine not found');
     }
     const timestamp = Date.now();
-    const updatedName = `${vaccine.name}*${timestamp}`;
+    const updatedName = `${vaccine.name}_deleted_${timestamp}`;
     await VaccinesModel.updateOne({ _id: id }, {
       $set: {
         name: updatedName,

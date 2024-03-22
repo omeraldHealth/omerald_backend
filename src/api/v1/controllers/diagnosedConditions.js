@@ -58,7 +58,7 @@ exports.deleteDiagnosedCondition = async (req, res) => {
 
     // Generate a timestamp string
     const timestamp = new Date().toISOString().replace(/:/g, '-'); // Replace colons to avoid file path issues
-    const updatedTitle = `${diagnosedCondition.title}_${timestamp}`;
+    const updatedTitle = `${diagnosedCondition.title}_deleted_${timestamp}`;
 
     // Update the document to append the timestamp to its title and set the deletedAt field
     await DiagnoseConditionsModel.findByIdAndUpdate(id, {
