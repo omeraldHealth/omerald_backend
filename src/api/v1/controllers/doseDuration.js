@@ -14,11 +14,14 @@ const getDoseDuration = async (req, res) => {
 // Create a new DoseDuration
 const createDoseDuration = async (req, res) => {
   const { duration } = req.body;
+  
   try {
+    // Directly pass the duration object as it matches the expected structure
     const doseDuration = await DoseDurationsModel.create({ duration });
     res.status(201).json(doseDuration);
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
+    console.error(error); // It's helpful to log the actual error for debugging
+    res.status(500).json({ error: 'Internal server error: ' + error.message });
   }
 };
 
@@ -59,16 +62,24 @@ const createManyDoseDuration = async (req, res) => {
 
 // Update a DoseDuration by ID
 const updateDoseDuration = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.body;
+  // Ensure that `duration` in `req.body` is structured correctly
+  // Example `req.body` structure: { duration: { type: "weeks", value: "2" } }
   const { duration } = req.body;
+
   try {
-    const updatedDoseDuration = await DoseDurationsModel.findByIdAndUpdate(id, { duration }, { new: true });
+    // It's crucial to ensure that the update object matches your schema's structure
+    // If `duration` is already structured as { type: String, value: String }, you can pass it directly
+    const update = { duration };
+
+    const updatedDoseDuration = await DoseDurationsModel.findByIdAndUpdate(id, update, { new: true });
     if (!updatedDoseDuration) {
       return res.status(404).json({ error: 'DoseDuration not found' });
     }
     res.json(updatedDoseDuration);
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
+    console.error(error); // It's useful to log the actual error for debugging
+    res.status(500).json({ error: 'Internal server error: ' + error.message });
   }
 };
 

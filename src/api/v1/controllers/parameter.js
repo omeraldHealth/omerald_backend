@@ -131,7 +131,7 @@ const deleteParameter = async (req, res) => {
       return res.status(404).json({ error: 'Parameter not found' });
     }
     const timestamp = Date.now();
-    const updatedName = `${parameter.name}*${timestamp}`;
+    const updatedName = `${parameter.name}_${timestamp}`;
     await ParametersModel.updateOne({ _id: id }, { $set: { name: updatedName, deletedAt: new Date() } });
     res.json({ message: 'Parameter deleted successfully' });
   } catch (error) {

@@ -63,7 +63,7 @@ const createManyDoses = async (req, res) => {
       // Existing doses
       const existingDoses = await DoseModel.find({}, { name: 1 });
       const existingNames = new Set(existingDoses.map(dose => dose.name));
-
+      console.log(jsonData)
       // Fetch duration and vaccine details
       const dosesToInsert = await Promise.all(jsonData.map(async dose => {
         if (typeof dose.name !== 'string' || !dose.name || existingNames.has(dose.name)) {
@@ -79,8 +79,10 @@ const createManyDoses = async (req, res) => {
 
         // Fetch vaccine document
         if (dose.vaccine) {
-          vaccineDoc = await VaccinesModel.findOne({ name: dose.vaccine }, 'name _id').lean();
+          // Use a regular expression with 'i' flag for case-insensitive matching
+          vaccineDoc = await VaccinesModel.findOne({ name: new RegExp('^' + dose.vaccine + '$', 'i') }, 'name _id').lean();
         }
+        
 
         return {
           name: dose.name,
@@ -110,7 +112,7 @@ const createManyDoses = async (req, res) => {
 
 // Update a dose by ID
 const updateDoses = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.body;
   try {
     const updatedDose = await DoseModel.findByIdAndUpdate(id, req.body, { new: true });
     if (!updatedDose) {
@@ -125,9 +127,11 @@ const updateDoses = async (req, res) => {
 
 // Delete a dose by ID
 const deleteDoses = async (req, res) => {
-  const { id } = req.params;
+  const { id, name } = req.params;
   try {
-    const deletedDose = await DoseModel.findByIdAndUpdate(id, { deletedAt: Date.now() });
+    const timestamp = Date.now();
+    const updatedName = `${name}_${timestamp}`;
+    const deletedDose = await DoseModel.findByIdAndUpdate(id, { deletedAt: Date.now(), name: updatedName });
     if (!deletedDose) {
       return res.status(404).json({ error: 'Dose not found' });
     }

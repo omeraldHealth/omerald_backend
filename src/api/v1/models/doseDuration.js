@@ -5,10 +5,10 @@ const doseDurationSchema = new mongoose.Schema({
     type: {
       type: String, 
       required: [true, 'Duration type is required'],
-      enum: {
-        values: ['days', 'weeks', 'months', 'years'],
-        message: 'Invalid duration type. Must be one of: days, weeks, months, years'
-      },
+      // enum: {
+      //   values: ['days', 'weeks', 'months', 'years'],
+      //   message: 'Invalid duration type. Must be one of: days, weeks, months, years'
+      // },
       trim: true
     },
     value: {
