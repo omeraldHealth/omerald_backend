@@ -87,7 +87,7 @@ const createManyParameters = async (req, res) => {
             aliases: Array.isArray(param.aliases) ? param.aliases : (typeof param.aliases === 'string' ? param.aliases.split(',') : []),
             units: param.units || '',
             bioRefRange: { basicRange: basicRanges },
-            isActive: param.isActive || false,
+            isActive: param.isActive || true,
             remedy: param.remedy || '',
           };
         })
