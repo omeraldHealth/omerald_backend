@@ -91,8 +91,15 @@ const createManySamples = async (req, res) => {
 // Update a sample by ID
 const updateSample = async (req, res) => {
   const { id } = req.body;
+
+  // Correctly format isActive to be a boolean
+  const requestBody = { ...req.body };
+  if (typeof requestBody.isActive === 'string') {
+    requestBody.isActive = requestBody.isActive.toLowerCase() === 'true';
+  }
+
   try {
-    const sample = await SampleModel.findByIdAndUpdate(id, req.body, { new: true });
+    const sample = await SampleModel.findByIdAndUpdate(id, requestBody, { new: true });
     if (!sample) {
       return res.status(404).json({ error: 'Sample not found' });
     }
@@ -102,6 +109,7 @@ const updateSample = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
 
 // Delete a sample by ID
 const deleteSample = async (req, res) => {
