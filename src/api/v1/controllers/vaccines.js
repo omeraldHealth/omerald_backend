@@ -44,7 +44,6 @@ const createManyVaccines = async (req, res) => {
   try {
     const existingVaccines = await VaccinesModel.find({ deletedAt: null }).select('name');
     const existingNames = new Set(existingVaccines.map(vaccine => vaccine.name.trim())); // Trim names just in case
-    console.log('Existing Names:', existingNames);
   
     // Filter out vaccines that do not meet the basic criteria or already exist
     let validatedData = jsonData.filter(vaccine => {
