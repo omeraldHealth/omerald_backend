@@ -43,26 +43,28 @@ const createManyVaccines = async (req, res) => {
 
   try {
     const existingVaccines = await VaccinesModel.find({ deletedAt: null }).select('name');
-    const existingNames = new Set(existingVaccines.map(vaccine => vaccine.name));
-
-    const validatedData = jsonData.filter(vaccine => {
-      return typeof vaccine.name === 'string' && vaccine.name.trim() !== '' && !existingNames.has(vaccine.name.trim());
-    }).map(vaccine => {
-      return {
-        name: vaccine.name.trim(),
-        type: typeof vaccine.type === 'string' ? vaccine.type : undefined,
-        recommendedFor: Array.isArray(vaccine.recommendedFor) ? vaccine.recommendedFor : (typeof vaccine.recommendedFor === 'string' ? vaccine.recommendedFor.split(',') : []),
-        // Add validations for other fields as needed
-      };
-    }).filter(vaccine => vaccine.name && vaccine.type);
-
+    const existingNames = new Set(existingVaccines.map(vaccine => vaccine.name.trim())); // Trim names just in case
+    console.log('Existing Names:', existingNames);
+  
+    // Filter out vaccines that do not meet the basic criteria or already exist
+    let validatedData = jsonData.filter(vaccine => {
+      const isNameValid = typeof vaccine.name === 'string' && vaccine.name.trim() !== '';
+      const isNameNew = !existingNames.has(vaccine.name.trim());
+      return isNameValid && isNameNew; // Return true for items that are valid and new
+    });
+  
     if (validatedData.length === 0) {
       return res.status(400).json({ message: "No new vaccines were added. They may already be present or the file was empty." });
     }
-
+  
+    // Attempt to insert new, validated vaccines
     const insertedVaccines = await VaccinesModel.insertMany(validatedData, { ordered: false });
     res.status(200).json({ message: "Vaccines added successfully", count: insertedVaccines.length, insertedIds: insertedVaccines.map(vaccine => vaccine._id) });
   } catch (error) {
+    // Handle specific error types here as needed (e.g., duplicate key error)
+    if (error.name === 'BulkWriteError' && error.code === 11000) {
+      return res.status(400).json({ error: 'Some vaccines could not be added due to duplication.' });
+    }
     res.status(500).json({ error: 'Internal server error: ' + error.message });
   }
 };
