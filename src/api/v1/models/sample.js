@@ -16,7 +16,8 @@ const validitySchema = new mongoose.Schema({
   month: createUnitValidator('month'),
   week: createUnitValidator('week'),
   day: createUnitValidator('day'),
-  hour: createUnitValidator('hour')
+  hour: createUnitValidator('hour'),
+  minute: createUnitValidator('minute')
 }, { _id: false });
 
 const sampleSchema = new mongoose.Schema({
