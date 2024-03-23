@@ -101,12 +101,10 @@ exports.createManyDiagnosedConditions = expressAsyncHandler(async (req, res) => 
     return res.status(400).send('No file uploaded.');
   }
 
-  // Read Excel file and parse data
   const workbook = xlsx.read(req.file.buffer);
   const worksheet = workbook.Sheets[workbook.SheetNames[0]];
   const jsonData = xlsx.utils.sheet_to_json(worksheet);
 
-  // Process and validate data
   const processedData = jsonData.map(data => ({
     title: data.title,
     description: data.description || '',
@@ -115,9 +113,21 @@ exports.createManyDiagnosedConditions = expressAsyncHandler(async (req, res) => 
     isActive: data?.isActive
   }));
 
-  // Insert or update DiagnosedConditions
-  await DiagnoseConditionsModel.insertMany(processedData, { ordered: false, rawResult: true });
-  res.status(200).json({ message: 'DiagnosedConditions inserted successfully' });
+  // Filter out duplicates based on title
+  const existingTitles = await DiagnoseConditionsModel.find({
+    title: { $in: processedData.map(data => data.title) }
+  }).select('title');
+
+  const existingTitlesSet = new Set(existingTitles.map(item => item.title));
+  const uniqueData = processedData.filter(data => !existingTitlesSet.has(data.title));
+
+  if (uniqueData.length === 0) {
+    return res.status(400).send('All data are duplicates and were not inserted.');
+  }
+
+  await DiagnoseConditionsModel.insertMany(uniqueData, { ordered: false, rawResult: true });
+  res.status(200).json({ message: `${uniqueData.length} DiagnosedConditions inserted successfully` });
+
 });
 
 // Get DiagnosedConditions by IDs
