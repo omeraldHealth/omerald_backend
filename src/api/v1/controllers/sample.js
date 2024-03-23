@@ -14,9 +14,9 @@ const getSample = async (req, res) => {
 
 // Create a new sample
 const createSample = async (req, res) => {
-  const { name, description, imageUrl, validity } = req.body;
+  const { name, description, isActive, validity } = req.body;
   try {
-    const sample = await SampleModel.create({ name, description, imageUrl, validity });
+    const sample = await SampleModel.create({ name, description, isActive, validity });
     res.status(201).json(sample);
   } catch (error) {
     console.error(error); // Log the error for debugging
