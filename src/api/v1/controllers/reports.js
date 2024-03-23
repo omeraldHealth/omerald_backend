@@ -61,12 +61,29 @@ const createManyReport = expressAsyncHandler(async (req, res) => {
       const sampleNames = report.sampleType.includes(',') ? report.sampleType.split(',').map(sample => sample.trim()) : [report.sampleType.trim()];
       const diagnosedConditionTitles = report.diagnosedConditions.includes(',') ? report.diagnosedConditions.split(',').map(condition => condition.trim()) : [report.diagnosedConditions.trim()];
     
-      // Find IDs for parameters
-      const parameters = await ParametersModel.find({ name: { $in: parameterNames.map(name => new RegExp(`\\b${name}\\b`, 'i')) } }).select('_id');
-      // Find IDs for samples, excluding specific patterns
-      const samples = await SampleModel.find({ name: { $in: sampleNames.map(name => new RegExp(`\\b${name}\\b`, 'i')) } }).select('_id');
+      const excludeDeletedPattern = /_DELETED_\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}\.\d{3}Z/;
+
+      const parameters = await ParametersModel.find({
+        name: {
+          $in: parameterNames.map(name => new RegExp(`\\b${name}\\b`, 'i')),
+          $not: excludeDeletedPattern
+        }
+      }).select('_id');
+      
+      const samples = await SampleModel.find({
+        name: {
+          $in: sampleNames.map(name => new RegExp(`\\b${name}\\b`, 'i')),
+          $not: excludeDeletedPattern
+        }
+      }).select('_id');
+      
       // Find IDs for diagnosed conditions
-      const diagnosedConditions = await DiagnoseConditionsModel.find({ title: { $in: diagnosedConditionTitles.map(title => new RegExp(`\\b${title}\\b`, 'i')) } }).select('_id');
+      const diagnosedConditions = await DiagnoseConditionsModel.find({
+        title: {
+          $in: diagnosedConditionTitles.map(title => new RegExp(`\\b${title}\\b`, 'i')),
+          $not: excludeDeletedPattern
+        }
+      }).select('_id');
 
       return {
         name: report?.name,
