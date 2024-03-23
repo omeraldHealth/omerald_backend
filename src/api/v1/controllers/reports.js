@@ -52,7 +52,10 @@ const createManyReport = expressAsyncHandler(async (req, res) => {
   const jsonData = xlsx.utils.sheet_to_json(worksheet);
   
   if (worksheetName === "reports") {
-    const existingReports = await ReportsModel.find().select('name -_id');
+    const existingReports = await ReportsModel.find({
+      deletedAt: null 
+    }).select('name -_id');
+    
     const existingTitles = new Set(existingReports.map(report => report.name));
 
     const reportsToInsert = await Promise.all(jsonData.map(async (report) => {
@@ -60,29 +63,21 @@ const createManyReport = expressAsyncHandler(async (req, res) => {
       const parameterNames = report.parameters.includes(',') ? report.parameters.split(',').map(param => param.trim()) : [report.parameters.trim()];
       const sampleNames = report.sampleType.includes(',') ? report.sampleType.split(',').map(sample => sample.trim()) : [report.sampleType.trim()];
       const diagnosedConditionTitles = report.diagnosedConditions.includes(',') ? report.diagnosedConditions.split(',').map(condition => condition.trim()) : [report.diagnosedConditions.trim()];
-    
-      const excludeDeletedPattern = /_DELETED_\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}\.\d{3}Z/;
 
       const parameters = await ParametersModel.find({
-        name: {
-          $in: parameterNames.map(name => new RegExp(`\\b${name}\\b`, 'i')),
-          $not: excludeDeletedPattern
-        }
+        name: { $in: parameterNames },
+        deletedAt: null
       }).select('_id');
       
       const samples = await SampleModel.find({
-        name: {
-          $in: sampleNames.map(name => new RegExp(`\\b${name}\\b`, 'i')),
-          $not: excludeDeletedPattern
-        }
+        name: { $in: sampleNames },
+        deletedAt: null
       }).select('_id');
       
       // Find IDs for diagnosed conditions
       const diagnosedConditions = await DiagnoseConditionsModel.find({
-        title: {
-          $in: diagnosedConditionTitles.map(title => new RegExp(`\\b${title}\\b`, 'i')),
-          $not: excludeDeletedPattern
-        }
+        name: { $in: diagnosedConditionTitles },
+        deletedAt: null
       }).select('_id');
 
       return {
