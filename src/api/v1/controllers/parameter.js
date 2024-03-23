@@ -71,7 +71,6 @@ const createManyParameters = async (req, res) => {
       }).select('name -_id');
       
       const existingTitles = new Set(existingParameters.map(report => report.name));
-  
 
       const validatedData = jsonData
         .filter(param => !existingTitles.has(param.name)) // Filter out existing names
@@ -91,7 +90,7 @@ const createManyParameters = async (req, res) => {
             aliases: Array.isArray(param.aliases) ? param.aliases : (typeof param.aliases === 'string' ? param.aliases.split(',') : []),
             units: param.units || '',
             bioRefRange: { basicRange: basicRanges },
-            isActive : param?.isActive?.toLowerCase() === "true"? true: false,
+            isActive: typeof data?.isActive === 'string' ? data.isActive.toLowerCase() === "true" : !!data?.isActive,
             remedy: param.remedy || '',
           };
         })

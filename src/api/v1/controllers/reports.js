@@ -55,7 +55,7 @@ const createManyReport = expressAsyncHandler(async (req, res) => {
     const existingReports = await ReportsModel.find({
       deletedAt: null 
     }).select('name -_id');
-    
+    console.log(existingReports)
     const existingTitles = new Set(existingReports.map(report => report.name));
 
     const reportsToInsert = await Promise.all(jsonData.map(async (report) => {
@@ -83,7 +83,7 @@ const createManyReport = expressAsyncHandler(async (req, res) => {
       return {
         name: report?.name,
         description: report?.description,
-        isActive : report?.isActive?.toLowerCase() === "true"? true: false,
+        isActive: typeof report?.isActive === 'string' ? report.isActive.toLowerCase() === "true" : !!report?.isActive,
         parameters: parameters?.length > 0 ? parameters.map(param => param._id): [],
         sample:  samples?.length > 0 ? samples.map(sample => sample._id): [],
         diagnoseConditions:  diagnosedConditions?.length > 0 ? diagnosedConditions.map(condition => condition._id):[],
