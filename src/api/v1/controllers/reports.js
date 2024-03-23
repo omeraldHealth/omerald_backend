@@ -55,7 +55,6 @@ const createManyReport = expressAsyncHandler(async (req, res) => {
     const existingReports = await ReportsModel.find({
       deletedAt: null 
     }).select('name -_id');
-    console.log(existingReports)
     const existingTitles = new Set(existingReports.map(report => report.name));
 
     const reportsToInsert = await Promise.all(jsonData.map(async (report) => {

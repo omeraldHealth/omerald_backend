@@ -96,9 +96,6 @@ const createManyParameters = async (req, res) => {
         })
         .filter(param => param.name !== null); // Remove invalid entries
 
-      // Batch insert validated data
-        console.log("Inserting parameters...", validatedData);
-
         if(validatedData.length > 0) {
           const insertedDocuments = await ParametersModel.insertMany(validatedData);
           const insertedIds = insertedDocuments.map(doc => doc._id);
