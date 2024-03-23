@@ -31,7 +31,8 @@ const getReport = expressAsyncHandler(async (req, res) => {
 
 // Create a new report
 const createReport = expressAsyncHandler(async (req, res) => {
-  const { name, description, image, sample, diagnoseConditions, parameters, isActive } = req.body;
+  let { name, description, image, sample, diagnoseConditions, parameters, isActive } = req.body;
+  isActive = true;
   try {
     const report = await ReportsModel.create({ name, description, image, sample, diagnoseConditions, parameters, isActive });
     res.status(201).json(report);
