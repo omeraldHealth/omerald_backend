@@ -5,7 +5,7 @@ const getActivity = async (req, res) => {
   try {
     const activities = await UserActivity.find({ deletedAt: null }) // Exclude soft-deleted documents
                                          .sort({ timestamp: -1 })
-                                         .limit(15);
+                                         .limit(300);
     if (!activities || activities.length === 0) {
       return res.status(404).json({ error: 'Activity not found' });
     }

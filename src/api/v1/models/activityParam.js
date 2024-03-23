@@ -34,7 +34,6 @@ const userActivitySchema = new mongoose.Schema({
   },
   content: {
     type: String,
-    required: [true, 'Content is required'],
     trim: true, // Trims whitespace from content
   },
   contentName: {
