@@ -110,7 +110,7 @@ exports.createManyDiagnosedConditions = expressAsyncHandler(async (req, res) => 
     description: data.description || '',
     imageUrl: data.imageUrl || '',
     aliases: data.aliases ? data.aliases.split(',') : [],
-    isActive: data?.isActive
+    isActive : data?.isActive?.toLowerCase() === "true"? true: false,
   }));
 
   // Filter out duplicates based on title

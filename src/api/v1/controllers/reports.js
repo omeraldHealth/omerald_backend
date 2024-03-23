@@ -83,7 +83,7 @@ const createManyReport = expressAsyncHandler(async (req, res) => {
       return {
         name: report?.name,
         description: report?.description,
-        isActive: report?.isActive,
+        isActive : report?.isActive?.toLowerCase() === "true"? true: false,
         parameters: parameters?.length > 0 ? parameters.map(param => param._id): [],
         sample:  samples?.length > 0 ? samples.map(sample => sample._id): [],
         diagnoseConditions:  diagnosedConditions?.length > 0 ? diagnosedConditions.map(condition => condition._id):[],
