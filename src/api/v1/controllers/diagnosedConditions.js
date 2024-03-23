@@ -21,7 +21,6 @@ exports.getDiagnosedConditionById = expressAsyncHandler(async (req, res) => {
 // Create a new DiagnosedCondition
 exports.createDiagnosedConditions = expressAsyncHandler(async (req, res) => {
   let { title, description, imageUrl, aliases, isActive, healthTopicLinks } = req.body;
-  isActive = true;
 
   const diagnosedCondition = await DiagnoseConditionsModel.create({
     title,
@@ -76,11 +75,13 @@ exports.searchDiagnosedCondition = async (req, res) => {
   const { query = '', page = 1 } = req.query;
   const pageSize = 20;
   const skip = (page - 1) * pageSize;
+
   const results = await DiagnoseConditionsModel.find({
     title: { $regex: query, $options: 'i' },
     isActive: true,
     deletedAt: null
   }).skip(skip).limit(pageSize);
+
   const totalResults = await DiagnoseConditionsModel.countDocuments({
     title: { $regex: query, $options: 'i' },
     isActive: true,
@@ -111,7 +112,7 @@ exports.createManyDiagnosedConditions = expressAsyncHandler(async (req, res) => 
     description: data.description || '',
     imageUrl: data.imageUrl || '',
     aliases: data.aliases ? data.aliases.split(',') : [],
-    isActive: data?.isActive === true,
+    isActive: data?.isActive
   }));
 
   // Insert or update DiagnosedConditions

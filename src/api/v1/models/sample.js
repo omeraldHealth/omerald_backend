@@ -42,7 +42,7 @@ const sampleSchema = new mongoose.Schema({
   },
   isActive: {
     type: Boolean,
-    default: true
+    default: false
   },
   validity: validitySchema
 }, {

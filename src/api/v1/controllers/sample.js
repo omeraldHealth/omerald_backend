@@ -60,7 +60,7 @@ const createManySamples = async (req, res) => {
         sample.validity = JSON.parse(sample.validity);
         // Now `sample.validity` is an object, and you can access its properties, e.g., sample.validity.year
 
-        sample.isActive = true; // Assuming you want to set isActive to true as part of your processing
+        sample.isActive = sample?.isActive; // Assuming you want to set isActive to true as part of your processing
       } catch (error) {
         console.error("Parsing error:", error);
         // Handle parsing error, e.g., invalid JSON format

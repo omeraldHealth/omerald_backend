@@ -32,7 +32,6 @@ const getReport = expressAsyncHandler(async (req, res) => {
 // Create a new report
 const createReport = expressAsyncHandler(async (req, res) => {
   let { name, description, image, sample, diagnoseConditions, parameters, isActive } = req.body;
-  isActive = true;
   try {
     const report = await ReportsModel.create({ name, description, image, sample, diagnoseConditions, parameters, isActive });
     res.status(201).json(report);
@@ -72,7 +71,7 @@ const createManyReport = expressAsyncHandler(async (req, res) => {
       return {
         name: report?.name,
         description: report?.description,
-        isActive: true,
+        isActive: report?.isActive,
         parameters: parameters?.length > 0 ? parameters.map(param => param._id): [],
         sample:  samples?.length > 0 ? samples.map(sample => sample._id): [],
         diagnoseConditions:  diagnosedConditions?.length > 0 ? diagnosedConditions.map(condition => condition._id):[],
