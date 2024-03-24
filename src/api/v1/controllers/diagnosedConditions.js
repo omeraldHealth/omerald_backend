@@ -20,7 +20,8 @@ exports.getDiagnosedConditionById = expressAsyncHandler(async (req, res) => {
 
 // Create a new DiagnosedCondition
 exports.createDiagnosedConditions = expressAsyncHandler(async (req, res) => {
-  const { title, description, imageUrl, aliases, isActive, healthTopicLinks } = req.body;
+  let { title, description, imageUrl, aliases, isActive, healthTopicLinks } = req.body;
+
   const diagnosedCondition = await DiagnoseConditionsModel.create({
     title,
     description,
@@ -31,6 +32,7 @@ exports.createDiagnosedConditions = expressAsyncHandler(async (req, res) => {
   });
   res.status(201).json({ message: 'DiagnosedCondition added successfully', diagnosedCondition });
 });
+
 
 // Update DiagnosedCondition by ID
 exports.updateDiagnosedConditions = async (req, res) => {
@@ -55,7 +57,7 @@ exports.deleteDiagnosedCondition = async (req, res) => {
 
     // Generate a timestamp string
     const timestamp = new Date().toISOString().replace(/:/g, '-'); // Replace colons to avoid file path issues
-    const updatedTitle = `${diagnosedCondition.title}_${timestamp}`;
+    const updatedTitle = `${diagnosedCondition.title}_deleted_${timestamp}`;
 
     // Update the document to append the timestamp to its title and set the deletedAt field
     await DiagnoseConditionsModel.findByIdAndUpdate(id, {
@@ -73,11 +75,13 @@ exports.searchDiagnosedCondition = async (req, res) => {
   const { query = '', page = 1 } = req.query;
   const pageSize = 20;
   const skip = (page - 1) * pageSize;
+
   const results = await DiagnoseConditionsModel.find({
     title: { $regex: query, $options: 'i' },
     isActive: true,
     deletedAt: null
   }).skip(skip).limit(pageSize);
+
   const totalResults = await DiagnoseConditionsModel.countDocuments({
     title: { $regex: query, $options: 'i' },
     isActive: true,
@@ -97,23 +101,33 @@ exports.createManyDiagnosedConditions = expressAsyncHandler(async (req, res) => 
     return res.status(400).send('No file uploaded.');
   }
 
-  // Read Excel file and parse data
   const workbook = xlsx.read(req.file.buffer);
   const worksheet = workbook.Sheets[workbook.SheetNames[0]];
   const jsonData = xlsx.utils.sheet_to_json(worksheet);
 
-  // Process and validate data
   const processedData = jsonData.map(data => ({
     title: data.title,
     description: data.description || '',
     imageUrl: data.imageUrl || '',
     aliases: data.aliases ? data.aliases.split(',') : [],
-    isActive: data.isActive === 'true'
+    isActive: typeof data?.isActive === 'string' ? data.isActive.toLowerCase() === "true" : !!data?.isActive,
   }));
 
-  // Insert or update DiagnosedConditions
-  await DiagnoseConditionsModel.insertMany(processedData, { ordered: false, rawResult: true });
-  res.status(200).json({ message: 'DiagnosedConditions inserted successfully' });
+  // Filter out duplicates based on title
+  const existingTitles = await DiagnoseConditionsModel.find({
+    title: { $in: processedData.map(data => data.title) }
+  }).select('title');
+
+  const existingTitlesSet = new Set(existingTitles.map(item => item.title));
+  const uniqueData = processedData.filter(data => !existingTitlesSet.has(data.title));
+
+  if (uniqueData.length === 0) {
+    return res.status(400).send('All data are duplicates and were not inserted.');
+  }
+
+  await DiagnoseConditionsModel.insertMany(uniqueData, { ordered: false, rawResult: true });
+  res.status(200).json({ message: `${uniqueData.length} DiagnosedConditions inserted successfully` });
+
 });
 
 // Get DiagnosedConditions by IDs

@@ -14,9 +14,9 @@ const getSample = async (req, res) => {
 
 // Create a new sample
 const createSample = async (req, res) => {
-  const { name, description, imageUrl, validity } = req.body;
+  const { name, description, isActive, validity } = req.body;
   try {
-    const sample = await SampleModel.create({ name, description, imageUrl, validity });
+    const sample = await SampleModel.create({ name, description, isActive, validity });
     res.status(201).json(sample);
   } catch (error) {
     console.error(error); // Log the error for debugging
@@ -51,11 +51,21 @@ const createManySamples = async (req, res) => {
         console.error('Description must be a string');
         return false;
       }
-      if (sample.imageUrl && typeof sample.imageUrl !== 'string') {
-        console.error('ImageUrl must be a string');
-        return false;
-      }
+      const correctedValidityString = sample.validity.replace(/(\w+):/g, '"$1":');
 
+      // Then parse it
+      // sample.validity = JSON.parse(correctedValidityString);
+     // Properly parse the JSON string into an object
+      try {
+        sample.validity = JSON.parse(sample.validity);
+        // Now `sample.validity` is an object, and you can access its properties, e.g., sample.validity.year
+
+        sample.isActive = sample?.isActive?.toLowerCase() === "true"? true: false; // Assuming you want to set isActive to true as part of your processing
+      } catch (error) {
+        console.error("Parsing error:", error);
+        // Handle parsing error, e.g., invalid JSON format
+      }
+      // Parse and validate validity
       // Deduplication check
       return !existingNames.has(sample.name);
     });
@@ -81,8 +91,15 @@ const createManySamples = async (req, res) => {
 // Update a sample by ID
 const updateSample = async (req, res) => {
   const { id } = req.body;
+
+  // Correctly format isActive to be a boolean
+  const requestBody = { ...req.body };
+  if (typeof requestBody.isActive === 'string') {
+    requestBody.isActive = requestBody.isActive.toLowerCase() === 'true';
+  }
+
   try {
-    const sample = await SampleModel.findByIdAndUpdate(id, req.body, { new: true });
+    const sample = await SampleModel.findByIdAndUpdate(id, requestBody, { new: true });
     if (!sample) {
       return res.status(404).json({ error: 'Sample not found' });
     }
@@ -92,6 +109,7 @@ const updateSample = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
 
 // Delete a sample by ID
 const deleteSample = async (req, res) => {
@@ -107,7 +125,7 @@ const deleteSample = async (req, res) => {
 
     // Append current timestamp to the sample name
     const timestamp = Date.now();
-    const updatedName = `${sample.name}*${timestamp}`;
+    const updatedName = `${sample.name}_deleted_${timestamp}`;
 
     // Update the sample name and set deletedAt
     await SampleModel.updateOne({ _id: id }, {

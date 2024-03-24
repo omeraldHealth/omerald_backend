@@ -60,11 +60,10 @@ const createManyDoses = async (req, res) => {
 
   if (worksheetName === 'doses') {
     try {
-      // Existing doses
       const existingDoses = await DoseModel.find({}, { name: 1 });
       const existingNames = new Set(existingDoses.map(dose => dose.name));
-
-      // Fetch duration and vaccine details
+    
+      // Your existing logic to prepare dosesToInsert remains unchanged...
       const dosesToInsert = await Promise.all(jsonData.map(async dose => {
         if (typeof dose.name !== 'string' || !dose.name || existingNames.has(dose.name)) {
           return undefined; // Skip invalid or duplicate entries
@@ -72,15 +71,13 @@ const createManyDoses = async (req, res) => {
 
         let durationDoc = null, vaccineDoc = null;
 
-        // Fetch duration document
-        if (dose.durationValue && dose.durationType) {
-          durationDoc = await DoseDurationsModel.findOne({ 'duration.value': dose.durationValue, 'duration.type': dose.durationType }, '_id').lean();
-        }
-
+      
         // Fetch vaccine document
         if (dose.vaccine) {
-          vaccineDoc = await VaccinesModel.findOne({ name: dose.vaccine }, 'name _id').lean();
+          // Use a regular expression with 'i' flag for case-insensitive matching
+          vaccineDoc = await VaccinesModel.findOne({ name: new RegExp('^' + dose.vaccine + '$', 'i') }, 'name _id').lean();
         }
+        
 
         return {
           name: dose.name,
@@ -89,13 +86,27 @@ const createManyDoses = async (req, res) => {
           type: dose.type
         };
       }));
-
+      
       // Filter out undefined entries
       const filteredDoses = dosesToInsert.filter(dose => dose !== undefined);
-
-      if (filteredDoses.length > 0) {
-        const insertedDoses = await DoseModel.insertMany(filteredDoses);
-        res.status(201).json({ message: 'Doses added successfully', doses: insertedDoses });
+    
+      const CHUNK_SIZE = 50; // Adjust this size as needed
+      let insertedDoses = [];
+    
+      for (let i = 0; i < filteredDoses.length; i += CHUNK_SIZE) {
+        const chunk = filteredDoses.slice(i, i + CHUNK_SIZE);
+        const insertedChunk = await DoseModel.insertMany(chunk, { ordered: false }).catch(error => {
+          console.error("Error inserting chunk:", error);
+          return []; // Return an empty array in case of error to keep the flow
+        });
+        insertedDoses.push(...insertedChunk);
+      }
+    
+      // Extract inserted IDs from insertedDoses
+      const insertedIds = insertedDoses.map(dose => dose._id);
+    
+      if (insertedIds.length > 0) {
+        res.status(201).json({ message: 'Doses added successfully', count: insertedIds.length, insertedIds });
       } else {
         res.status(400).json({ message: 'No new doses added or duplicates found' });
       }
@@ -103,6 +114,7 @@ const createManyDoses = async (req, res) => {
       console.error(error);
       res.status(500).json({ error: 'Internal server error' });
     }
+    
   } else {
     res.status(400).send("Incorrect worksheet name. Please use 'doses'.");
   }
@@ -110,7 +122,7 @@ const createManyDoses = async (req, res) => {
 
 // Update a dose by ID
 const updateDoses = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.body;
   try {
     const updatedDose = await DoseModel.findByIdAndUpdate(id, req.body, { new: true });
     if (!updatedDose) {
@@ -125,9 +137,11 @@ const updateDoses = async (req, res) => {
 
 // Delete a dose by ID
 const deleteDoses = async (req, res) => {
-  const { id } = req.params;
+  const { id, name } = req.params;
   try {
-    const deletedDose = await DoseModel.findByIdAndUpdate(id, { deletedAt: Date.now() });
+    const timestamp = Date.now();
+    const updatedName = `${name}_deleted_${timestamp}`;
+    const deletedDose = await DoseModel.findByIdAndUpdate(id, { deletedAt: Date.now(), name: updatedName });
     if (!deletedDose) {
       return res.status(404).json({ error: 'Dose not found' });
     }
