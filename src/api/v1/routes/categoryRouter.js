@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const categoryController = require("../controllers/diagnosticLanding");
+const categoryController = require("../controllers/category");
 
 router.get('/getDiagLanding', categoryController.getAllCategories);
 router.post('/createDiagLanding', categoryController.createCategory);

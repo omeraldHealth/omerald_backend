@@ -1,6 +1,6 @@
 // controllers/diagnosticLandingController.js
 const expressAsyncHandler = require('express-async-handler');
-const DiagnosticLandingSettings = require('../models/dia'); // Adjust the import path as needed
+const DiagnosticLandingSettings = require('../models/diagnosticLanding'); // Adjust the import path as needed
 
 exports.createOrUpdateLandingSettings = expressAsyncHandler(async (req, res) => {
   const existingSettings = await DiagnosticLandingSettings.findOne();
