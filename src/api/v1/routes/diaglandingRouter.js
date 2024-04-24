@@ -1,10 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const diagLandingController = require("../controllers/category");
+const diagLandingController = require("../controllers/diagLanding");
 
-router.get('/getAllCategories', diagLandingController.getAllCategories);
-router.post('/createCategories', diagLandingController.createCategory);
-router.put('/updateCategories/:id', diagLandingController.updateCategory);
-router.delete('/deleteCategories/:id', diagLandingController.deleteCategory);
+router.get('/getDiagLanding', diagLandingController.getLandingSettings);
+router.post('/updateDiagLanding', diagLandingController.createOrUpdateLandingSettings);
+router.put('/deleteDiagLanding/:id', diagLandingController.deleteLandingSettings);
 
 module.exports = router;
