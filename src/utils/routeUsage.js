@@ -20,7 +20,7 @@ const routeConfig = [
     { path: '/health', route: routeImports.healthRouter },
     { path: '/activity', route: routeImports.activityRouter },
     { path: '/category', route: routeImports.categoryRouter },
-    { path: '/diagnosicLanding', route: routeImports.diagLandingRouter },
+    { path: '/diagnosticLanding', route: routeImports.diagLandingRouter },
 ];
 
 
