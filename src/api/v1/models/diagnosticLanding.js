@@ -31,18 +31,17 @@ const diagnosticLandingSchema = new mongoose.Schema({
       },
       meta: {
         type: String,
-        required: [true, 'Meta is required'],
         trim: true
       },
-      getStartedUrl: {
-        type: String,
-        trim: true
-      },
-      demoVideoUrl: {
-        type: String,
-        trim: true
-      }
     }],
+    getStartedUrl: {
+      type: String,
+      trim: true
+    },
+    demoVideoUrl: {
+      type: String,
+      trim: true
+    },
     testimonials: [{
       name: {
         type: String,
