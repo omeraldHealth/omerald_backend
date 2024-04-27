@@ -18,7 +18,6 @@ exports.uploadDiagImages = expressAsyncHandler(async (req, res) => {
         Key: `uploads/${req.file.originalname}`, // File name you want to save as
         Body: req.file.buffer,
         ContentType: req.file.mimetype,
-        ACL: 'public-read' // Adjust ACL according to your requirements
     };
 
     try {
