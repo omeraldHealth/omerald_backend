@@ -57,7 +57,7 @@ const diagnoseConditionsSchema = new mongoose.Schema({
   }],
   isActive: {
     type: Boolean,
-    default: true,
+    default: false,
   },
   healthTopicLinks: {
     type: [healthTopicLinkSchema],

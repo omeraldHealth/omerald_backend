@@ -66,11 +66,14 @@ const createManyParameters = async (req, res) => {
   if (worksheetName === "parameters") {
     try {
       // Fetch existing parameter names to avoid duplicates
-      const existingParameters = await ParametersModel.find().select('name -_id');
-      const existingNames = new Set(existingParameters.map(param => param.name));
+      const existingParameters = await ParametersModel.find({
+        deletedAt: null 
+      }).select('name -_id');
+      
+      const existingTitles = new Set(existingParameters.map(report => report.name));
 
       const validatedData = jsonData
-        .filter(param => !existingNames.has(param.name)) // Filter out existing names
+        .filter(param => !existingTitles.has(param.name)) // Filter out existing names
         .map(param => {
           // Parse and validate bioRefRange
           const basicRanges = [];
@@ -87,16 +90,20 @@ const createManyParameters = async (req, res) => {
             aliases: Array.isArray(param.aliases) ? param.aliases : (typeof param.aliases === 'string' ? param.aliases.split(',') : []),
             units: param.units || '',
             bioRefRange: { basicRange: basicRanges },
-            isActive: param.isActive || false,
+            isActive: typeof data?.isActive === 'string' ? data.isActive.toLowerCase() === "true" : !!data?.isActive,
             remedy: param.remedy || '',
           };
         })
         .filter(param => param.name !== null); // Remove invalid entries
 
-      // Batch insert validated data
-      const insertedDocuments = await ParametersModel.insertMany(validatedData);
-      const insertedIds = insertedDocuments.map(doc => doc._id);
-      res.status(200).json({ message: "Parameters inserted successfully", count: insertedIds.length, insertedIds });
+        if(validatedData.length > 0) {
+          const insertedDocuments = await ParametersModel.insertMany(validatedData);
+          const insertedIds = insertedDocuments.map(doc => doc._id);
+          res.status(200).json({ message: "Parameters inserted successfully", count: insertedIds.length, insertedIds });
+        }else{
+          res.status(400).json({ message: "Parameters already present or found no entries" });
+        }
+     
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Internal server error' });
@@ -131,7 +138,7 @@ const deleteParameter = async (req, res) => {
       return res.status(404).json({ error: 'Parameter not found' });
     }
     const timestamp = Date.now();
-    const updatedName = `${parameter.name}*${timestamp}`;
+    const updatedName = `${parameter.name}_deleted_${timestamp}`;
     await ParametersModel.updateOne({ _id: id }, { $set: { name: updatedName, deletedAt: new Date() } });
     res.json({ message: 'Parameter deleted successfully' });
   } catch (error) {
