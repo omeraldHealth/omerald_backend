@@ -1,6 +1,5 @@
 const express = require('express');
-const routeImports = require('./routes'); // Assuming this contains your route definitions
-// const { cacheMiddleware } = require('./middleware');
+const routeImports = require('./routes'); 
 
 const router = express.Router();
 const API_PREFIX = '/api/v1';
@@ -22,7 +21,6 @@ const routeConfig = [
     { path: '/category', route: routeImports.categoryRouter },
     { path: '/diagnosticLanding', route: routeImports.diagLandingRouter },
 ];
-
 
 // Apply cache middleware and set up routes dynamically
 routeConfig.forEach(({ path, route }) => {
