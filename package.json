@@ -3,10 +3,6 @@
   "version": "1.0.0",
   "description": "omerald backend api",
   "main": "server.js",
-  "scripts": {
-    "test": "jest",
-    "start": "nodemon app.js"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",
