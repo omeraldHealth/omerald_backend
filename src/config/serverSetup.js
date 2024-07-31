@@ -42,10 +42,10 @@ function setupServer(port) {
 
   
   // Public route
-  app.post('/api/v1/auth/getAuthToken', authenticateAPIUser);
+  // app.post('/api/v1/auth/getAuthToken', authenticateAPIUser);
 
   // Apply JWT authentication to all subsequent routes
-  app.use(authenticateToken);
+  // app.use(authenticateToken);
   
   // Route usage tracking
   app.use(routeUsage);

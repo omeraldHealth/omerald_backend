@@ -43,12 +43,13 @@ const getParameter = async (req, res) => {
 // Create a new parameter
 const createParameter = async (req, res) => {
   const { name, description, aliases, units, bioRefRange, isActive, remedy } = req.body;
+  console.log(req.body)
   try {
     const parameter = await ParametersModel.create({ name, description, aliases, units, bioRefRange, isActive, remedy });
     res.status(201).json(parameter);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error'+ error.message });
   }
 };
 
