@@ -4,7 +4,7 @@
     "paths": {
       "@src/*": ["src/*"],
       "@models/*": ["src/api/v1/models/*"],
-      "@controllers/*": ["src/api/v1/controllers/*"]
+      "@controllers/*": ["src/api/v1/controllers/*"]   
     }
   }
 }
